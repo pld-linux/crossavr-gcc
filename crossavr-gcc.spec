@@ -5,13 +5,13 @@ Summary(pl):	Skro¶ne narzêdzia programistyczne GNU dla AVR - gcc
 Summary(pt_BR): Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr):    GNU geliþtirme araçlarý - AVR gcc
 Name:		crossavr-gcc
-Version:	3.2
+Version:	3.3.2
 Release:	1
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	13f289fff789927b9b798bf37552019c
+# Source0-md5:	65999f654102f5438ac8562d13a6eced
 BuildRequires:	crossavr-binutils
 BuildRequires:	flex
 BuildRequires:	bison
@@ -78,10 +78,6 @@ cd obj-%{target}
 PATH=$PATH:/sbin:%{_sbindir}
 
 %{__make} -C gcc install \
-	prefix=$RPM_BUILD_ROOT%{_prefix} \
-	mandir=$RPM_BUILD_ROOT%{_mandir} \
-	infodir=$RPM_BUILD_ROOT%{_infodir} \
-	gxx_include_dir=$RPM_BUILD_ROOT%{arch}/include/g++ \
 	DESTDIR=$RPM_BUILD_ROOT
 
 # c++filt is provided by binutils
@@ -104,8 +100,8 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{gccarch}
 %dir %{gcclib}
 %attr(755,root,root) %{gcclib}/cc1
-%attr(755,root,root) %{gcclib}/tradcpp0
-%attr(755,root,root) %{gcclib}/cpp0
+#%attr(755,root,root) %{gcclib}/tradcpp0
+#%attr(755,root,root) %{gcclib}/cpp0
 %attr(755,root,root) %{gcclib}/collect2
 %{gcclib}/libgcc.a
 %{gcclib}/specs*
