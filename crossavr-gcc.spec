@@ -42,7 +42,7 @@ maszynach binariów do uruchamiania na Atmel AVR.
 Summary:	C++ support for avr-gcc
 Summary(pl):	Obs³uga C++ dla avr-gcc
 Group:		Development/Languages
-Requires:	crossavr-gcc = %{epoch}:%{version}-%{release}
+Requires:	%{name} = %{epoch}:%{version}-%{release}
 
 %description c++
 This package adds C++ support to the GNU Compiler Collection for AVR.
