@@ -5,13 +5,13 @@ Summary(pl):	Skro¶ne narzêdzia programistyczne GNU dla AVR - gcc
 Summary(pt_BR): Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr):    GNU geliþtirme araçlarý - AVR gcc
 Name:		crossavr-gcc
-Version:	3.3.2
-Release:	2
+Version:	3.4.0
+Release:	1
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	65999f654102f5438ac8562d13a6eced
+# Source0-md5:	85c6fc83d51be0fbb4f8205accbaff59
 BuildRequires:	autoconf
 BuildRequires:	/bin/bash
 BuildRequires:	bison
@@ -22,8 +22,8 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		target		avr
 %define		arch		%{_prefix}/%{target}
-%define		gccarch		%{_prefix}/lib/gcc-lib/%{target}
-%define		gcclib		%{_prefix}/lib/gcc-lib/%{target}/%{version}
+%define		gccarch		%{_libdir}/gcc/%{target}
+%define		gcclib		%{_libdir}/gcc/%{target}/%{version}
 %define		no_install_post_strip	1
 
 %description
@@ -42,7 +42,7 @@ i386 binariów do uruchamiania na Atmel AVR.
 Summary:	C++ support for avr-gcc
 Summary(pl):	Obs³uga C++ dla avr-gcc
 Group:		Development/Languages
-Requires:	crossavr-gcc = %{epoch}:%{version}
+Requires:	crossavr-gcc = %{epoch}:%{version}-%{release}
 
 %description c++
 This package adds C++ support to the GNU Compiler Collection for AVR.
@@ -65,6 +65,9 @@ TEXCONFIG=false \
 	--prefix=%{_prefix} \
 	--infodir=%{_infodir} \
 	--mandir=%{_mandir} \
+	--bindir=%{_bindir} \
+	--libdir=%{_libdir} \
+	--libexecdir=%{_libdir} \
 	--disable-shared \
 	--enable-languages="c,c++" \
 	--enable-long-long \
@@ -92,18 +95,15 @@ PATH=$PATH:/sbin:%{_sbindir}
 %{__make} -C gcc install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-# c++filt is provided by binutils
-#rm -f $RPM_BUILD_ROOT%{_bindir}/i386-mipsel-c++filt
+%if 0%{!?debug:1}
+# strip native binaries
+strip -R .comment -R .note \
+	`echo $RPM_BUILD_ROOT%{_bindir}/* | grep -v gccbug` \
+	$RPM_BUILD_ROOT%{gcclib}/{cc1*,collect2}
 
-# what is this there for???
-rm -f $RPM_BUILD_ROOT%{_libdir}/libiberty.a
-
-# the same... make hardlink
-#ln -f $RPM_BUILD_ROOT%{arch}/bin/gcc $RPM_BUILD_ROOT%{_bindir}/%{target}-gcc
-
-%{target}-strip -g $RPM_BUILD_ROOT%{gcclib}/libgcc.a
-
-#%find_lang %{name}
+# strip target libraries
+%{target}-strip -g $RPM_BUILD_ROOT%{gcclib}{,/avr*}/libg*.a
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -116,15 +116,15 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{gccarch}
 %dir %{gcclib}
 %attr(755,root,root) %{gcclib}/cc1
-#%attr(755,root,root) %{gcclib}/tradcpp0
-#%attr(755,root,root) %{gcclib}/cpp0
 %attr(755,root,root) %{gcclib}/collect2
-%{gcclib}/libgcc.a
-%{gcclib}/specs*
+%{gcclib}/libg*.a
+%{gcclib}/specs
 %{gcclib}/%{target}*
 %dir %{gcclib}/include
 %{gcclib}/include/*.h
+%{_mandir}/man1/%{target}-cpp.1*
 %{_mandir}/man1/%{target}-gcc.1*
+%{_mandir}/man1/%{target}-gcov.1*
 
 %files c++
 %defattr(644,root,root,755)
