@@ -6,7 +6,7 @@ Summary(pt_BR): Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr):    GNU geliþtirme araçlarý - AVR gcc
 Name:		crossavr-gcc
 Version:	3.4.1
-Release:	1
+Release:	2
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
@@ -18,6 +18,7 @@ BuildRequires:	bison
 BuildRequires:	crossavr-binutils
 BuildRequires:	flex
 Requires:	crossavr-binutils
+Requires:	gcc-dirs
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		target		avr
