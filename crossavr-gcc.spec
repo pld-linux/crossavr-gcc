@@ -6,7 +6,7 @@ Summary(pt_BR): Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr):    GNU geliþtirme araçlarý - AVR gcc
 Name:		crossavr-gcc
 Version:	3.3.2
-Release:	1
+Release:	2
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
@@ -40,6 +40,17 @@ i386-Rechner Code für Atmel AVR zu generieren.
 Ten pakiet zawiera skro¶ny gcc pozwalaj±cy na robienie na maszynach
 i386 binariów do uruchamiania na Atmel AVR.
 
+%package c++
+Summary:        C++ support for avr-gcc
+Group:          Development/Languages
+Requires:       crossavr-gcc = %{epoch}:%{version}
+
+%description c++
+This package adds C++ support to the GNU Compiler Collection for AVR.
+
+%description c++ -l pl
+Ten pakiet dodaje obs³ugê C++ do kompilatora gcc dla AVR.
+
 %prep
 %setup -q -n gcc-%{version}
 
@@ -55,7 +66,7 @@ TEXCONFIG=false ../configure \
 	--infodir=%{_infodir} \
 	--mandir=%{_mandir} \
 	--disable-shared \
-	--enable-languages="c" \
+	--enable-languages="c,c++" \
 	--enable-long-long \
 	--with-gnu-as \
 	--with-gnu-ld \
@@ -92,12 +103,16 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libiberty.a
 
 %{target}-strip -g $RPM_BUILD_ROOT%{gcclib}/libgcc.a
 
+#%find_lang %{name}
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files
+%files 
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/%{target}-*
+%attr(755,root,root) %{_bindir}/%{target}-gcc*
+%attr(755,root,root) %{_bindir}/%{target}-cpp
+%attr(755,root,root) %{_bindir}/%{target}-gcov
 %dir %{gccarch}
 %dir %{gcclib}
 %attr(755,root,root) %{gcclib}/cc1
@@ -110,3 +125,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{gcclib}/include
 %{gcclib}/include/*.h
 %{_mandir}/man1/%{target}-gcc.1*
+
+%files c++
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/%{target}-g++
+%attr(755,root,root) %{_bindir}/%{target}-c++
+%attr(755,root,root) %{gcclib}/cc1plus
+%{_mandir}/man1/%{target}-g++.1*
