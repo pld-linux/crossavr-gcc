@@ -5,13 +5,13 @@ Summary(pl):	Skro¶ne narzêdzia programistyczne GNU dla AVR - gcc
 Summary(pt_BR): Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr):    GNU geliþtirme araçlarý - AVR gcc
 Name:		crossavr-gcc
-Version:	3.4.0
+Version:	3.4.1
 Release:	1
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	85c6fc83d51be0fbb4f8205accbaff59
+# Source0-md5:	31b459062499f9f68d451db9cbf3205c
 BuildRequires:	autoconf
 BuildRequires:	/bin/bash
 BuildRequires:	bison
@@ -24,7 +24,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define		arch		%{_prefix}/%{target}
 %define		gccarch		%{_libdir}/gcc/%{target}
 %define		gcclib		%{_libdir}/gcc/%{target}/%{version}
-%define		no_install_post_strip	1
+%define		_noautostrip	.*%{gcclib}.*/libgc.*\\.a
 
 %description
 This package contains a cross-gcc which allows the creation of
@@ -70,37 +70,27 @@ TEXCONFIG=false \
 	--libexecdir=%{_libdir} \
 	--disable-shared \
 	--enable-languages="c,c++" \
-	--enable-long-long \
 	--with-gnu-as \
 	--with-gnu-ld \
 	--with-system-zlib \
 	--with-multilib \
 	--without-x \
+	--build=%{_target_platform} \
+	--host=%{_target_platform} \
 	--target=%{target}
 
-PATH=$PATH:/sbin:%{_sbindir}
-
-cd ..
-#LDFLAGS_FOR_TARGET="%{rpmldflags}"
-
-%{__make} -C obj-%{target}
+%{__make}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{%{_datadir},%{_bindir},%{gcclib}}
 
-cd obj-%{target}
-PATH=$PATH:/sbin:%{_sbindir}
-
-%{__make} -C gcc install \
+%{__make} -C obj-%{target} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
-%if 0%{!?debug:1}
-# strip native binaries
-strip -R .comment -R .note \
-	`echo $RPM_BUILD_ROOT%{_bindir}/* | grep -v gccbug` \
-	$RPM_BUILD_ROOT%{gcclib}/{cc1*,collect2}
+# don't want it here
+rm -f $RPM_BUILD_ROOT%{_libdir}/libiberty.a
 
+%if 0%{!?debug:1}
 # strip target libraries
 %{target}-strip -g $RPM_BUILD_ROOT%{gcclib}{,/avr*}/libg*.a
 %endif
