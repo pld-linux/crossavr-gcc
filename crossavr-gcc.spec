@@ -26,6 +26,7 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define		arch		%{_prefix}/%{target}
 %define		gccarch		%{_prefix}/lib/gcc-lib/%{target}
 %define		gcclib		%{_prefix}/lib/gcc-lib/%{target}/%{version}
+%define		no_install_post_strip	1
 
 %description
 This package contains a cross-gcc which allows the creation of
