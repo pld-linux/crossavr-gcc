@@ -1,7 +1,7 @@
 Summary:	Cross AVR GNU Binary Utility Development Utilities - gcc
 Summary(pl):	Narzêdzia programistyczne GNU Cross AVR - gcc
 Name:		crossavr-gcc
-Version:	3.0.4
+Version:	3.2
 Release:	1
 Epoch:		1
 License:	GPL
@@ -67,7 +67,7 @@ cd ..
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{/lib,%{_datadir},%{_bindir}}
+install -d $RPM_BUILD_ROOT{/lib,%{_datadir},%{_bindir},%{gcclib}} 
 
 cd obj-%{target}
 PATH=$PATH:/sbin:%{_sbindir}
@@ -95,31 +95,16 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/%{target}-gcc
-%attr(755,root,root) %{_bindir}/%{target}-cpp
-#%dir %{arch}/bin
-#%attr(755,root,root) %{arch}/bin/cpp
-#%attr(755,root,root) %{arch}/bin/gcc
-#%attr(755,root,root) %{arch}/bin/gcov
-#%{arch}/include/_G_config.h
+%attr(755,root,root) %{_bindir}/%{target}-*
 %dir %{gccarch}
 %dir %{gcclib}
 %attr(755,root,root) %{gcclib}/cc1
 %attr(755,root,root) %{gcclib}/tradcpp0
 %attr(755,root,root) %{gcclib}/cpp0
 %attr(755,root,root) %{gcclib}/collect2
-#%{gcclib}/SYSCALLS.c.X
 %{gcclib}/libgcc.a
 %{gcclib}/specs*
+%{gcclib}/%{target}*
 %dir %{gcclib}/include
 %{gcclib}/include/*.h
-#%{gcclib}/include/iso646.h
-#%{gcclib}/include/limits.h
-#%{gcclib}/include/proto.h
-#%{gcclib}/include/stdarg.h
-#%{gcclib}/include/stdbool.h
-#%{gcclib}/include/stddef.h
-#%{gcclib}/include/syslimits.h
-#%{gcclib}/include/varargs.h
-#%{gcclib}/include/va-*.h
 %{_mandir}/man1/%{target}-gcc.1*
