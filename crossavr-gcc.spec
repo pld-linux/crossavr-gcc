@@ -7,6 +7,7 @@ Epoch:		1
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
+# Source0-md5:	13f289fff789927b9b798bf37552019c
 BuildRequires:	crossavr-binutils
 BuildRequires:	flex
 BuildRequires:	bison
