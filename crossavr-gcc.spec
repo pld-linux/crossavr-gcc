@@ -12,17 +12,15 @@ License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
 # Source0-md5:	65999f654102f5438ac8562d13a6eced
-BuildRequires:	crossavr-binutils
-BuildRequires:	flex
-BuildRequires:	bison
 BuildRequires:	autoconf
 BuildRequires:	/bin/bash
+BuildRequires:	bison
+BuildRequires:	crossavr-binutils
+BuildRequires:	flex
 Requires:	crossavr-binutils
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-%define		cxx		0
 %define		target		avr
-%define		_prefix		/usr
 %define		arch		%{_prefix}/%{target}
 %define		gccarch		%{_prefix}/lib/gcc-lib/%{target}
 %define		gcclib		%{_prefix}/lib/gcc-lib/%{target}/%{version}
@@ -41,9 +39,10 @@ Ten pakiet zawiera skro¶ny gcc pozwalaj±cy na robienie na maszynach
 i386 binariów do uruchamiania na Atmel AVR.
 
 %package c++
-Summary:        C++ support for avr-gcc
-Group:          Development/Languages
-Requires:       crossavr-gcc = %{epoch}:%{version}
+Summary:	C++ support for avr-gcc
+Summary(pl):	Obs³uga C++ dla avr-gcc
+Group:		Development/Languages
+Requires:	crossavr-gcc = %{epoch}:%{version}
 
 %description c++
 This package adds C++ support to the GNU Compiler Collection for AVR.
@@ -61,7 +60,8 @@ cd obj-%{target}
 
 CFLAGS="%{rpmcflags}" \
 CXXFLAGS="%{rpmcflags}" \
-TEXCONFIG=false ../configure \
+TEXCONFIG=false \
+../configure \
 	--prefix=%{_prefix} \
 	--infodir=%{_infodir} \
 	--mandir=%{_mandir} \
