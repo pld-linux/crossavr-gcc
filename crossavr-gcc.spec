@@ -1,5 +1,9 @@
-Summary:	Cross AVR GNU Binary Utility Development Utilities - gcc
-Summary(pl):	Narzêdzia programistyczne GNU Cross AVR - gcc
+Summary:	Cross AVR GNU binary utility development utilities - gcc
+Summary(es):	Utilitarios para desarrollo de binarios de la GNU - AVR gcc
+Summary(fr):	Utilitaires de développement binaire de GNU - AVR gcc
+Summary(pl):	Skro¶ne narzêdzia programistyczne GNU dla AVR - gcc
+Summary(pt_BR): Utilitários para desenvolvimento de binários da GNU - AVR gcc
+Summary(tr):    GNU geliþtirme araçlarý - AVR gcc
 Name:		crossavr-gcc
 Version:	3.2
 Release:	1
@@ -32,8 +36,8 @@ Dieses Paket enthält einen Cross-gcc, der es erlaubt, auf einem
 i386-Rechner Code für Atmel AVR zu generieren.
 
 %description -l pl
-Ten pakiet zawiera cross-gcc pozwalaj±cy na robienie binariów do
-uruchamiania na Atmel AVR na maszynach i386.
+Ten pakiet zawiera skro¶ny gcc pozwalaj±cy na robienie na maszynach
+i386 binariów do uruchamiania na Atmel AVR.
 
 %prep
 %setup -q -n gcc-%{version}
