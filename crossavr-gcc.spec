@@ -5,13 +5,13 @@ Summary(pl):	Skro¶ne narzêdzia programistyczne GNU dla AVR - gcc
 Summary(pt_BR): Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr):	GNU geliþtirme araçlarý - AVR gcc
 Name:		crossavr-gcc
-Version:	3.4.2
+Version:	4.1.0
 Release:	1
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	2fada3a3effd2fd791df09df1f1534b3
+# Source0-md5:	88785071f29ed0e0b6b61057a1079442
 BuildRequires:	autoconf
 BuildRequires:	/bin/bash
 BuildRequires:	bison
@@ -70,6 +70,7 @@ TEXCONFIG=false \
 	--libdir=%{_libdir} \
 	--libexecdir=%{_libdir} \
 	--disable-shared \
+	--disable-libssp \
 	--enable-languages="c,c++" \
 	--with-gnu-as \
 	--with-gnu-ld \
@@ -80,7 +81,7 @@ TEXCONFIG=false \
 	--host=%{_target_platform} \
 	--target=%{target}
 
-%{__make}
+%{__make} CFLAGS_FOR_TARGET="-Os"
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -109,7 +110,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{gcclib}/cc1
 %attr(755,root,root) %{gcclib}/collect2
 %{gcclib}/libg*.a
-%{gcclib}/specs
 %{gcclib}/%{target}*
 %dir %{gcclib}/include
 %{gcclib}/include/*.h
