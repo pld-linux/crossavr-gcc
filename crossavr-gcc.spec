@@ -2,7 +2,6 @@ Summary:	Cross AVR GNU binary utility development utilities - gcc
 Summary(es):	Utilitarios para desarrollo de binarios de la GNU - AVR gcc
 Summary(fr):	Utilitaires de développement binaire de GNU - AVR gcc
 Summary(pl):	Skro¶ne narzêdzia programistyczne GNU dla AVR - gcc
-Summary(pt_BR): Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr):	GNU geliþtirme araçlarý - AVR gcc
 Name:		crossavr-gcc
 Version:	4.1.1
