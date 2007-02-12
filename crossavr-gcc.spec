@@ -1,9 +1,9 @@
 Summary:	Cross AVR GNU binary utility development utilities - gcc
-Summary(es.UTF-8):   Utilitarios para desarrollo de binarios de la GNU - AVR gcc
-Summary(fr.UTF-8):   Utilitaires de développement binaire de GNU - AVR gcc
-Summary(pl.UTF-8):   Skrośne narzędzia programistyczne GNU dla AVR - gcc
-Summary(pt_BR.UTF-8):   Utilitários para desenvolvimento de binários da GNU - AVR gcc
-Summary(tr.UTF-8):   GNU geliştirme araçları - AVR gcc
+Summary(es.UTF-8):	Utilitarios para desarrollo de binarios de la GNU - AVR gcc
+Summary(fr.UTF-8):	Utilitaires de développement binaire de GNU - AVR gcc
+Summary(pl.UTF-8):	Skrośne narzędzia programistyczne GNU dla AVR - gcc
+Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AVR gcc
+Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
 Version:	4.1.1
 Release:	1
@@ -41,7 +41,7 @@ maszynach binariów do uruchamiania na Atmel AVR.
 
 %package c++
 Summary:	C++ support for avr-gcc
-Summary(pl.UTF-8):   Obsługa C++ dla avr-gcc
+Summary(pl.UTF-8):	Obsługa C++ dla avr-gcc
 Group:		Development/Languages
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 
