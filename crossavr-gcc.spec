@@ -1,8 +1,9 @@
 Summary:	Cross AVR GNU binary utility development utilities - gcc
-Summary(es):	Utilitarios para desarrollo de binarios de la GNU - AVR gcc
-Summary(fr):	Utilitaires de développement binaire de GNU - AVR gcc
-Summary(pl):	Skro¶ne narzêdzia programistyczne GNU dla AVR - gcc
-Summary(tr):	GNU geliþtirme araçlarý - AVR gcc
+Summary(es.UTF-8):   Utilitarios para desarrollo de binarios de la GNU - AVR gcc
+Summary(fr.UTF-8):   Utilitaires de dÃ©veloppement binaire de GNU - AVR gcc
+Summary(pl.UTF-8):   SkroÅ›ne narzÄ™dzia programistyczne GNU dla AVR - gcc
+Summary(pt_BR.UTF-8):   UtilitÃ¡rios para desenvolvimento de binÃ¡rios da GNU - AVR gcc
+Summary(tr.UTF-8):   GNU geliÅŸtirme araÃ§larÄ± - AVR gcc
 Name:		crossavr-gcc
 Version:	4.1.1
 Release:	1
@@ -30,25 +31,25 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 This package contains a cross-gcc which allows the creation of
 binaries to be run on Atmel AVR on other machines.
 
-%description -l de
-Dieses Paket enthält einen Cross-gcc, der es erlaubt, auf einem
-anderem Rechner Code für Atmel AVR zu generieren.
+%description -l de.UTF-8
+Dieses Paket enthÃ¤lt einen Cross-gcc, der es erlaubt, auf einem
+anderem Rechner Code fÃ¼r Atmel AVR zu generieren.
 
-%description -l pl
-Ten pakiet zawiera skro¶ny gcc pozwalaj±cy na robienie na innych
-maszynach binariów do uruchamiania na Atmel AVR.
+%description -l pl.UTF-8
+Ten pakiet zawiera skroÅ›ny gcc pozwalajÄ…cy na robienie na innych
+maszynach binariÃ³w do uruchamiania na Atmel AVR.
 
 %package c++
 Summary:	C++ support for avr-gcc
-Summary(pl):	Obs³uga C++ dla avr-gcc
+Summary(pl.UTF-8):   ObsÅ‚uga C++ dla avr-gcc
 Group:		Development/Languages
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 
 %description c++
 This package adds C++ support to the GNU Compiler Collection for AVR.
 
-%description c++ -l pl
-Ten pakiet dodaje obs³ugê C++ do kompilatora gcc dla AVR.
+%description c++ -l pl.UTF-8
+Ten pakiet dodaje obsÅ‚ugÄ™ C++ do kompilatora gcc dla AVR.
 
 %prep
 %setup -q -n gcc-%{version}
