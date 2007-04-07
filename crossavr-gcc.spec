@@ -5,13 +5,13 @@ Summary(pl.UTF-8):	Skrośne narzędzia programistyczne GNU dla AVR - gcc
 Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
-Version:	4.1.1
+Version:	4.1.2
 Release:	1
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	ad9f97a4d04982ccf4fd67cb464879f3
+# Source0-md5:	a4a3eb15c96030906d8494959eeda23c
 BuildRequires:	autoconf
 BuildRequires:	/bin/bash
 BuildRequires:	bison
