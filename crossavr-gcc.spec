@@ -1,3 +1,7 @@
+#
+# Conditional build:
+%bcond_with	bootstrap	# for bootstraping
+#
 Summary:	Cross AVR GNU binary utility development utilities - gcc
 Summary(es.UTF-8):	Utilitarios para desarrollo de binarios de la GNU - AVR gcc
 Summary(fr.UTF-8):	Utilitaires de développement binaire de GNU - AVR gcc
@@ -25,6 +29,7 @@ BuildRequires:	bison
 BuildRequires:	crossavr-binutils
 BuildRequires:	flex
 Requires:	crossavr-binutils >= 2.15.91.0.2
+%{!?with_boostrap:Requires:	crossavr-libc}
 Requires:	gcc-dirs
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
