@@ -4,15 +4,15 @@ Summary(fr):	Utilitaires de développement binaire de GNU - AVR gcc
 Summary(pl):	Skro¶ne narzêdzia programistyczne GNU dla AVR - gcc
 Summary(tr):	GNU geliþtirme araçlarý - AVR gcc
 Name:		crossavr-gcc
-Version:	4.1.1
-Release:	1
+Version:	4.1.2
+Release:	2
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	ad9f97a4d04982ccf4fd67cb464879f3
-BuildRequires:	autoconf
+# Source0-md5:	a4a3eb15c96030906d8494959eeda23c
 BuildRequires:	/bin/bash
+BuildRequires:	autoconf
 BuildRequires:	bison
 BuildRequires:	crossavr-binutils
 BuildRequires:	flex
@@ -90,6 +90,14 @@ rm -rf $RPM_BUILD_ROOT
 
 # don't want it here
 rm -f $RPM_BUILD_ROOT%{_libdir}/libiberty.a
+rm -rf $RPM_BUILD_ROOT%{_infodir}
+rm -f $RPM_BUILD_ROOT%{_mandir}/man7/fsf-funding.7
+rm -f $RPM_BUILD_ROOT%{_mandir}/man7/gfdl.7
+rm -f $RPM_BUILD_ROOT%{_mandir}/man7/gpl.7
+rm -f $RPM_BUILD_ROOT%{_datadir}/locale/*/LC_MESSAGES/{gcc,cpplib}.mo
+rm -f $RPM_BUILD_ROOT%{gcclib}/include/fixed
+rm -f $RPM_BUILD_ROOT%{gcclib}/include/README
+rm -rf $RPM_BUILD_ROOT%{gcclib}/install-tools
 
 %if 0%{!?debug:1}
 # strip target libraries
@@ -99,11 +107,12 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libiberty.a
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files 
+%files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/%{target}-gcc*
 %attr(755,root,root) %{_bindir}/%{target}-cpp
 %attr(755,root,root) %{_bindir}/%{target}-gcov
+%dir %{arch}
 %dir %{gccarch}
 %dir %{gcclib}
 %attr(755,root,root) %{gcclib}/cc1
