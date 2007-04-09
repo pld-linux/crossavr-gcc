@@ -6,7 +6,7 @@ Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AV
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
 Version:	4.1.2
-Release:	2
+Release:	3
 Patch0:		%{name}-0b-constants.patch
 Patch1:		%{name}-attribute_alias.patch
 Patch2:		%{name}-bug25672.patch
@@ -24,7 +24,7 @@ BuildRequires:	autoconf
 BuildRequires:	bison
 BuildRequires:	crossavr-binutils
 BuildRequires:	flex
-Requires:	crossavr-binutils
+Requires:	crossavr-binutils >= 2.15.91.0.2
 Requires:	gcc-dirs
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -128,7 +128,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/%{target}-gcc*
 %attr(755,root,root) %{_bindir}/%{target}-cpp
 %attr(755,root,root) %{_bindir}/%{target}-gcov
-%dir %{arch}
 %dir %{gccarch}
 %dir %{gcclib}
 %attr(755,root,root) %{gcclib}/cc1
