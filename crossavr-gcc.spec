@@ -20,7 +20,7 @@ BuildRequires:	autoconf
 BuildRequires:	bison
 BuildRequires:	crossavr-binutils >= 2.17.50.0.2
 BuildRequires:	flex
-Requires:	crossavr-binutils
+Requires:	crossavr-binutils >= 2.17.50.0.2
 Requires:	gcc-dirs
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
