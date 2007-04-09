@@ -1,3 +1,5 @@
+%define		_snap	20070316
+%define		_rel	0.1
 Summary:	Cross AVR GNU binary utility development utilities - gcc
 Summary(es.UTF-8):	Utilitarios para desarrollo de binarios de la GNU - AVR gcc
 Summary(fr.UTF-8):	Utilitaires de développement binaire de GNU - AVR gcc
@@ -5,13 +7,14 @@ Summary(pl.UTF-8):	Skrośne narzędzia programistyczne GNU dla AVR - gcc
 Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
-Version:	4.1.2
-Release:	2
+Version:	4.2.0
+Release:	0.%{_snap}.%{_rel}
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
-Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	a4a3eb15c96030906d8494959eeda23c
+#Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
+Source0:	ftp://gcc.gnu.org/pub/gcc/prerelease-%{version}-%{_snap}/gcc-%{version}-%{_snap}.tar.bz2
+# Source0-md5:	27b316cc79f73ef7a416edd1cb50ae99
 BuildRequires:	/bin/bash
 BuildRequires:	autoconf
 BuildRequires:	bison
@@ -52,7 +55,7 @@ This package adds C++ support to the GNU Compiler Collection for AVR.
 Ten pakiet dodaje obsługę C++ do kompilatora gcc dla AVR.
 
 %prep
-%setup -q -n gcc-%{version}
+%setup -q -n gcc-%{version}-%{_snap}
 
 %build
 rm -rf obj-%{target}
