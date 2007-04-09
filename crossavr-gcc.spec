@@ -18,7 +18,7 @@ Source0:	ftp://gcc.gnu.org/pub/gcc/prerelease-%{version}-%{_snap}/gcc-%{version}
 BuildRequires:	/bin/bash
 BuildRequires:	autoconf
 BuildRequires:	bison
-BuildRequires:	crossavr-binutils
+BuildRequires:	crossavr-binutils >= 2.17.50.0.2
 BuildRequires:	flex
 Requires:	crossavr-binutils
 Requires:	gcc-dirs
