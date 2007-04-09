@@ -6,14 +6,21 @@ Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AV
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
 Version:	4.1.1
-Release:	1
+Release:	2
+Patch0:		%{name}-0b-constants.patch
+Patch1:		%{name}-attribute_alias.patch
+Patch2:		%{name}-bug25672.patch
+Patch3:		%{name}-dwarf.patch
+Patch4:		%{name}-libiberty-Makefile.in.patch
+Patch5:		%{name}-newdevices.patch
+Patch6:		%{name}-zz-atmega256x.patch
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
 # Source0-md5:	ad9f97a4d04982ccf4fd67cb464879f3
-BuildRequires:	autoconf
 BuildRequires:	/bin/bash
+BuildRequires:	autoconf
 BuildRequires:	bison
 BuildRequires:	crossavr-binutils
 BuildRequires:	flex
@@ -53,6 +60,13 @@ Ten pakiet dodaje obsługę C++ do kompilatora gcc dla AVR.
 
 %prep
 %setup -q -n gcc-%{version}
+%patch0 -p0
+%patch1 -p0
+%patch2 -p0
+%patch3 -p0
+%patch4 -p0
+%patch5 -p0
+%patch6 -p0
 
 %build
 rm -rf obj-%{target}
@@ -72,6 +86,7 @@ TEXCONFIG=false \
 	--disable-shared \
 	--disable-libssp \
 	--enable-languages="c,c++" \
+	--with-dwarf2 \
 	--with-gnu-as \
 	--with-gnu-ld \
 	--with-system-zlib \
@@ -91,6 +106,14 @@ rm -rf $RPM_BUILD_ROOT
 
 # don't want it here
 rm -f $RPM_BUILD_ROOT%{_libdir}/libiberty.a
+rm -rf $RPM_BUILD_ROOT%{_infodir}
+rm -f $RPM_BUILD_ROOT%{_mandir}/man7/fsf-funding.7
+rm -f $RPM_BUILD_ROOT%{_mandir}/man7/gfdl.7
+rm -f $RPM_BUILD_ROOT%{_mandir}/man7/gpl.7
+rm -f $RPM_BUILD_ROOT%{_datadir}/locale/*/LC_MESSAGES/{gcc,cpplib}.mo
+rm -f $RPM_BUILD_ROOT%{gcclib}/include/fixed
+rm -f $RPM_BUILD_ROOT%{gcclib}/include/README
+rm -rf $RPM_BUILD_ROOT%{gcclib}/install-tools
 
 %if 0%{!?debug:1}
 # strip target libraries
@@ -100,11 +123,12 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/libiberty.a
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files 
+%files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/%{target}-gcc*
 %attr(755,root,root) %{_bindir}/%{target}-cpp
 %attr(755,root,root) %{_bindir}/%{target}-gcov
+%dir %{arch}
 %dir %{gccarch}
 %dir %{gcclib}
 %attr(755,root,root) %{gcclib}/cc1
