@@ -1,3 +1,7 @@
+#
+# Conditional build:
+%bcond_with	bootstrap	# for bootstraping
+#
 Summary:	Cross AVR GNU binary utility development utilities - gcc
 Summary(es):	Utilitarios para desarrollo de binarios de la GNU - AVR gcc
 Summary(fr):	Utilitaires de développement binaire de GNU - AVR gcc
@@ -5,7 +9,14 @@ Summary(pl):	Skro¶ne narzêdzia programistyczne GNU dla AVR - gcc
 Summary(tr):	GNU geliþtirme araçlarý - AVR gcc
 Name:		crossavr-gcc
 Version:	4.1.2
-Release:	2
+Release:	3
+Patch0:		%{name}-0b-constants.patch
+Patch1:		%{name}-attribute_alias.patch
+Patch2:		%{name}-bug25672.patch
+Patch3:		%{name}-dwarf.patch
+Patch4:		%{name}-libiberty-Makefile.in.patch
+Patch5:		%{name}-newdevices.patch
+Patch6:		%{name}-zz-atmega256x.patch
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
@@ -16,7 +27,8 @@ BuildRequires:	autoconf
 BuildRequires:	bison
 BuildRequires:	crossavr-binutils
 BuildRequires:	flex
-Requires:	crossavr-binutils
+Requires:	crossavr-binutils >= 2.15.91.0.2
+%{!?with_boostrap:Requires:	crossavr-libc}
 Requires:	gcc-dirs
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -52,6 +64,13 @@ Ten pakiet dodaje obs³ugê C++ do kompilatora gcc dla AVR.
 
 %prep
 %setup -q -n gcc-%{version}
+%patch0 -p0
+%patch1 -p0
+%patch2 -p0
+%patch3 -p0
+%patch4 -p0
+%patch5 -p0
+%patch6 -p0
 
 %build
 rm -rf obj-%{target}
@@ -71,6 +90,7 @@ TEXCONFIG=false \
 	--disable-shared \
 	--disable-libssp \
 	--enable-languages="c,c++" \
+	--with-dwarf2 \
 	--with-gnu-as \
 	--with-gnu-ld \
 	--with-system-zlib \
@@ -112,7 +132,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/%{target}-gcc*
 %attr(755,root,root) %{_bindir}/%{target}-cpp
 %attr(755,root,root) %{_bindir}/%{target}-gcov
-%dir %{arch}
 %dir %{gccarch}
 %dir %{gcclib}
 %attr(755,root,root) %{gcclib}/cc1
