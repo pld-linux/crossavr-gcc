@@ -9,7 +9,7 @@ Summary(pl):	Skro¶ne narzêdzia programistyczne GNU dla AVR - gcc
 Summary(tr):	GNU geliþtirme araçlarý - AVR gcc
 Name:		crossavr-gcc
 Version:	4.1.2
-Release:	3
+Release:	4
 Patch0:		%{name}-0b-constants.patch
 Patch1:		%{name}-attribute_alias.patch
 Patch2:		%{name}-bug25672.patch
