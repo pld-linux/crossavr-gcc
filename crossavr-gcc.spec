@@ -9,20 +9,19 @@ Summary(pl.UTF-8):	Skrośne narzędzia programistyczne GNU dla AVR - gcc
 Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
-Version:	4.1.2
-Release:	3
+Version:	4.2.2
+Release:	1
 Patch0:		%{name}-0b-constants.patch
 Patch1:		%{name}-attribute_alias.patch
 Patch2:		%{name}-bug25672.patch
 Patch3:		%{name}-dwarf.patch
 Patch4:		%{name}-libiberty-Makefile.in.patch
-Patch5:		%{name}-newdevices.patch
-Patch6:		%{name}-zz-atmega256x.patch
+Patch5:		%{name}-zz-atmega256x.patch
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	a4a3eb15c96030906d8494959eeda23c
+# Source0-md5:	7ae33781417a35a2eb03ee098a9f4490
 BuildRequires:	/bin/bash
 BuildRequires:	autoconf
 BuildRequires:	bison
@@ -70,8 +69,7 @@ Ten pakiet dodaje obsługę C++ do kompilatora gcc dla AVR.
 %patch2 -p0
 %patch3 -p0
 %patch4 -p0
-%patch5 -p0
-%patch6 -p0
+%patch5 -p1
 
 %build
 rm -rf obj-%{target}
