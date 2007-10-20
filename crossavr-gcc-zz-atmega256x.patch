@@ -1,9 +1,9 @@
-diff -ur gcc/config/avr/avr.c gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.c
---- gcc/config/avr/avr.c	2006-09-07 20:19:07.276183419 +0200
-+++ gcc/config/avr/avr.c	2006-09-07 20:49:56.268363803 +0200
-@@ -123,20 +123,26 @@
- /* Assembler only.  */
- int avr_asm_only_p = 0;
+diff -uNdr gcc-4.2.2/gcc/config/avr-old/avr.c gcc-4.2.2/gcc/config/avr/avr.c
+--- gcc-4.2.2/gcc/config/avr-old/avr.c	2007-09-01 17:28:30.000000000 +0200
++++ gcc-4.2.2/gcc/config/avr/avr.c	2007-10-20 18:13:32.000000000 +0200
+@@ -129,22 +129,28 @@
+ /* Core have 'MOVW' and 'LPM Rx,Z' instructions.  */
+ int avr_have_movw_lpmx_p = 0;
  
 +/* Usually holds the value 2, but could be 3 for the larger devices with a
 +   3-byte program counter.  */
@@ -13,39 +13,42 @@ diff -ur gcc/config/avr/avr.c gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.c
    int asm_only;
    int enhanced;
    int mega;
+   int have_movw_lpmx;
 +  int three_byte_pc;
    const char *const macro;
  };
  
  static const struct base_arch_s avr_arch_types[] = {
--  { 1, 0, 0, NULL },  /* unknown device specified */
--  { 1, 0, 0, "__AVR_ARCH__=1" },
--  { 0, 0, 0, "__AVR_ARCH__=2" },
--  { 0, 0, 1, "__AVR_ARCH__=3" },
--  { 0, 1, 0, "__AVR_ARCH__=4" },
--  { 0, 1, 1, "__AVR_ARCH__=5" }
-+  { 1, 0, 0, 0, NULL },  /* unknown device specified */
-+  { 1, 0, 0, 0, "__AVR_ARCH__=1" },
-+  { 0, 0, 0, 0, "__AVR_ARCH__=2" },
-+  { 0, 0, 1, 0, "__AVR_ARCH__=3" },
-+  { 0, 1, 0, 0, "__AVR_ARCH__=4" },
-+  { 0, 1, 1, 0, "__AVR_ARCH__=5" },
-+  { 0, 1, 1, 1, "__AVR_ARCH__=6" }
+-  { 1, 0, 0, 0,  NULL },  /* unknown device specified */
+-  { 1, 0, 0, 0, "__AVR_ARCH__=1" },
+-  { 0, 0, 0, 0, "__AVR_ARCH__=2" },
+-  { 0, 0, 0, 1, "__AVR_ARCH__=25"},
+-  { 0, 0, 1, 0, "__AVR_ARCH__=3" },
+-  { 0, 1, 0, 1, "__AVR_ARCH__=4" },
+-  { 0, 1, 1, 1, "__AVR_ARCH__=5" }
++  { 1, 0, 0, 0, 0, NULL },  /* unknown device specified */
++  { 1, 0, 0, 0, 0, "__AVR_ARCH__=1" },
++  { 0, 0, 0, 0, 0, "__AVR_ARCH__=2" },
++  { 0, 0, 0, 1, 0, "__AVR_ARCH__=25"},
++  { 0, 0, 1, 0, 0, "__AVR_ARCH__=3" },
++  { 0, 1, 0, 1, 0, "__AVR_ARCH__=4" },
++  { 0, 1, 1, 1, 0, "__AVR_ARCH__=5" },
++  { 0, 1, 1, 1, 1, "__AVR_ARCH__=6" }
  };
  
- struct mcu_type_s {
-@@ -237,6 +243,10 @@
-   { "at90usb1286", 5, "__AVR_AT90USB1286__" },
-   { "at90usb1287", 5, "__AVR_AT90USB1287__" },
-   { "at94k",     5, "__AVR_AT94K__" },
+ /* These names are used as the index into the avr_arch_types[] table 
+@@ -269,6 +275,10 @@
+   { "at90usb1286",  ARCH_AVR5, "__AVR_AT90USB1286__" },
+   { "at90usb1287",  ARCH_AVR5, "__AVR_AT90USB1287__" },
+   { "at94k",        ARCH_AVR5, "__AVR_AT94K__" },
 +    /* 3-Byte PC */
 +  { "avr6",      6, NULL },
 +  { "atmega2560",     6, "__AVR_ATmega2560__" },
 +  { "atmega2561",     6, "__AVR_ATmega2561__" },
      /* Assembler only.  */
-   { "avr1",      1, NULL },
-   { "at90s1200", 1, "__AVR_AT90S1200__" },
-@@ -319,6 +329,11 @@
+   { "avr1",         ARCH_AVR1, NULL },
+   { "at90s1200",    ARCH_AVR1, "__AVR_AT90S1200__" },
+@@ -354,6 +364,11 @@
    avr_base_arch_macro = base->macro;
    avr_extra_arch_macro = t->macro;
  
@@ -57,7 +60,7 @@ diff -ur gcc/config/avr/avr.c gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.c
    if (optimize && !TARGET_NO_TABLEJUMP)
      avr_case_values_threshold = (!AVR_MEGA || TARGET_CALL_PROLOGUES) ? 8 : 17;
  
-@@ -476,7 +491,7 @@
+@@ -482,7 +497,7 @@
        int offset = frame_pointer_needed ? 2 : 0;
  
        offset += avr_regs_to_save (NULL);
@@ -66,7 +69,7 @@ diff -ur gcc/config/avr/avr.c gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.c
      }
  }
  
-@@ -660,7 +675,6 @@
+@@ -666,7 +681,6 @@
    int reg;
    int interrupt_func_p;
    int signal_func_p;
@@ -74,7 +77,7 @@ diff -ur gcc/config/avr/avr.c gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.c
    int live_seq;
    int minimize;
  
-@@ -678,7 +692,6 @@
+@@ -684,7 +698,6 @@
  
    interrupt_func_p = interrupt_function_p (current_function_decl);
    signal_func_p = signal_function_p (current_function_decl);
@@ -82,7 +85,7 @@ diff -ur gcc/config/avr/avr.c gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.c
    live_seq = sequent_regs_live ();
    minimize = (TARGET_CALL_PROLOGUES
  	      && !interrupt_func_p && !signal_func_p && live_seq);
-@@ -698,25 +711,14 @@
+@@ -704,25 +717,14 @@
  	       AS1 (clr,__zero_reg__)    "\n");
        prologue_size += 5;
      }
@@ -111,7 +114,7 @@ diff -ur gcc/config/avr/avr.c gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.c
        
        prologue_size += 4;
        
-@@ -787,7 +789,6 @@
+@@ -793,7 +795,6 @@
    int reg;
    int interrupt_func_p;
    int signal_func_p;
@@ -119,7 +122,7 @@ diff -ur gcc/config/avr/avr.c gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.c
    int function_size;
    int live_seq;
    int minimize;
-@@ -819,27 +820,12 @@
+@@ -825,27 +826,12 @@
  
    interrupt_func_p = interrupt_function_p (current_function_decl);
    signal_func_p = signal_function_p (current_function_decl);
@@ -149,7 +152,7 @@ diff -ur gcc/config/avr/avr.c gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.c
      {
        fprintf (file, ("\t" AS2 (ldi, r30, %d) CR_TAB), live_seq);
        ++epilogue_size;
-@@ -1097,7 +1083,7 @@
+@@ -1103,7 +1089,7 @@
  	  && ((GET_CODE (addr) == SYMBOL_REF && SYMBOL_REF_FUNCTION_P (addr))
  	      || GET_CODE (addr) == LABEL_REF))
  	{
@@ -158,7 +161,7 @@ diff -ur gcc/config/avr/avr.c gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.c
  	  output_addr_const (file,addr);
  	  fprintf (file ,")");
  	}
-@@ -4518,7 +4504,7 @@
+@@ -4524,7 +4510,7 @@
        && ((GET_CODE (x) == SYMBOL_REF && SYMBOL_REF_FUNCTION_P (x))
  	  || GET_CODE (x) == LABEL_REF))
      {
@@ -167,20 +170,20 @@ diff -ur gcc/config/avr/avr.c gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.c
        output_addr_const (asm_out_file, x);
        fputs (")\n", asm_out_file);
        return true;
-@@ -5880,7 +5866,7 @@
+@@ -5914,7 +5900,7 @@
  {
-   progmem_section ();
+   switch_to_section (progmem_section);
    if (AVR_MEGA)
 -    fprintf (stream, "\t.word pm(.L%d)\n", value);
 +    fprintf (stream, "\t.word gs(.L%d)\n", value);
    else
      fprintf (stream, "\trjmp .L%d\n", value);
  
-diff -ur gcc/config/avr/avr.h gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.h
---- gcc/config/avr/avr.h	2006-09-07 20:19:07.304181348 +0200
-+++ gcc/config/avr/avr.h	2006-09-07 20:49:56.277363137 +0200
-@@ -33,6 +33,10 @@
- 	builtin_define (avr_extra_arch_macro);	\
+diff -uNdr gcc-4.2.2/gcc/config/avr-old/avr.h gcc-4.2.2/gcc/config/avr/avr.h
+--- gcc-4.2.2/gcc/config/avr-old/avr.h	2007-10-20 18:11:38.000000000 +0200
++++ gcc-4.2.2/gcc/config/avr/avr.h	2007-10-20 18:12:15.000000000 +0200
+@@ -36,6 +36,10 @@
+ 	builtin_define ("__AVR_HAVE_LPMX__");	\
        if (avr_asm_only_p)			\
  	builtin_define ("__AVR_ASM_ONLY__");	\
 +      if (avr_pc_size == 2)			\
@@ -189,15 +192,18 @@ diff -ur gcc/config/avr/avr.h gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.h
 +	builtin_define ("__AVR_3_BYTE_PC__");	\
        if (avr_enhanced_p)			\
  	builtin_define ("__AVR_ENHANCED__");	\
-       if (avr_mega_p)				\
-@@ -47,10 +51,14 @@
- extern int avr_mega_p;
+       if (avr_enhanced_p)			\
+@@ -53,6 +57,7 @@
  extern int avr_enhanced_p;
  extern int avr_asm_only_p;
+ extern int avr_have_movw_lpmx_p;
 +extern int avr_pc_size;
- 
- #define AVR_MEGA (avr_mega_p && !TARGET_SHORT_CALLS)
+ #ifndef IN_LIBGCC2
+ extern GTY(()) section *progmem_section;
+ #endif
+@@ -61,6 +66,9 @@
  #define AVR_ENHANCED (avr_enhanced_p)
+ #define AVR_HAVE_MOVW (avr_have_movw_lpmx_p)
  
 +#define AVR_3_BYTE_PC (avr_pc_size == 3)
 +#define AVR_2_BYTE_PC (avr_pc_size == 2)
@@ -205,7 +211,7 @@ diff -ur gcc/config/avr/avr.h gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.h
  #define TARGET_VERSION fprintf (stderr, " (GNU assembler syntax)");
  
  #define OVERRIDE_OPTIONS avr_override_options ()
-@@ -747,12 +755,13 @@
+@@ -727,12 +735,13 @@
  
  #define CPP_SPEC "%{posix:-D_POSIX_SOURCE}"
  
@@ -221,16 +227,16 @@ diff -ur gcc/config/avr/avr.h gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.h
 +/* A C string constant that tells the GCC driver program options to
     pass to `cc1plus'.  */
  
- #define ASM_SPEC "%{mmcu=*:-mmcu=%*}"
-@@ -793,6 +802,7 @@
+ #define ASM_SPEC "%{mmcu=avr25:-mmcu=avr2;\
+@@ -773,6 +782,7 @@
    mmcu=at90can*|\
    mmcu=at90usb*|\
    mmcu=at94k:-m avr5}\
 +%{mmcu=atmega256*:-m avr6}\
  %{mmcu=atmega324*|\
-   mmcu=atmega325|\
-   mmcu=atmega3250|\
-@@ -818,7 +828,8 @@
+   mmcu=atmega325*|\
+   mmcu=atmega329*|\
+@@ -796,7 +806,8 @@
    mmcu=at90usb*: -Tdata 0x800100}\
  %{mmcu=atmega640|\
    mmcu=atmega1280|\
@@ -240,19 +246,19 @@ diff -ur gcc/config/avr/avr.h gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.h
  
  #define LIB_SPEC \
    "%{!mmcu=at90s1*:%{!mmcu=attiny11:%{!mmcu=attiny12:%{!mmcu=attiny15:%{!mmcu=attiny28: -lc }}}}}"
-@@ -904,6 +915,8 @@
+@@ -887,6 +898,8 @@
  %{mmcu=atmega128:crtm128.o%s} \
  %{mmcu=atmega1280:crtm1280.o%s} \
  %{mmcu=atmega1281:crtm1281.o%s} \
 +%{mmcu=atmega2560:crtm2560.o%s} \
 +%{mmcu=atmega2561:crtm2561.o%s} \
+ %{mmcu=atmega8hva:crtm8hva.o%s} \
+ %{mmcu=atmega16hva:crtm16hva.o%s} \
  %{mmcu=at90can32:crtcan32.o%s} \
- %{mmcu=at90can64:crtcan64.o%s} \
- %{mmcu=at90can128:crtcan128.o%s} \
-diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
---- gcc/config/avr/avr.md	2005-06-28 21:56:23.000000000 +0200
-+++ gcc/config/avr/avr.md	2006-09-07 20:49:56.246365431 +0200
-@@ -2087,22 +2087,47 @@
+diff -uNdr gcc-4.2.2/gcc/config/avr-old/avr.md gcc-4.2.2/gcc/config/avr/avr.md
+--- gcc-4.2.2/gcc/config/avr-old/avr.md	2007-09-01 17:28:30.000000000 +0200
++++ gcc-4.2.2/gcc/config/avr/avr.md	2007-10-20 18:12:15.000000000 +0200
+@@ -2099,22 +2099,45 @@
    "(register_operand (operands[0], HImode) || CONSTANT_P (operands[0]))"
    "*{
    if (which_alternative==0)
@@ -265,7 +271,7 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
 +    }
    else if (which_alternative==1)
      {
-       if (AVR_ENHANCED)
+       if (AVR_HAVE_MOVW)
 -	return (AS2 (movw, r30, %0) CR_TAB
 -		\"icall\");
 +        {
@@ -282,11 +288,11 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
 -		\"icall\");
 +        {
 +          if (AVR_3_BYTE_PC)
-+	    return (AS2 (mov, r30, %A0) CR_TAB
++            return (AS2 (mov, r30, %A0) CR_TAB
 +                    AS2 (mov, r31, %B0) CR_TAB
 +                    \"eicall\");
 +          else
-+	    return (AS2 (mov, r30, %A0) CR_TAB
++            return (AS2 (mov, r30, %A0) CR_TAB
 +                    AS2 (mov, r31, %B0) CR_TAB
 +                    \"icall\");
 +        }
@@ -296,8 +302,6 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
 -  return (AS2 (ldi,r30,lo8(%0)) CR_TAB
 -          AS2 (ldi,r31,hi8(%0)) CR_TAB
 -          \"icall\");
-+
-+
 +  if (AVR_3_BYTE_PC)
 +    return (AS2 (ldi,r30,lo8(%0)) CR_TAB
 +            AS2 (ldi,r31,hi8(%0)) CR_TAB
@@ -305,11 +309,11 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
 +  else
 +    return (AS2 (ldi,r30,lo8(%0)) CR_TAB
 +            AS2 (ldi,r31,hi8(%0)) CR_TAB
-+            \"icall\");
++            \"icall\");    
  }"
    [(set_attr "cc" "clobber,clobber,clobber,clobber")
     (set_attr_alternative "length"
-@@ -2124,22 +2149,46 @@
+@@ -2136,22 +2159,45 @@
    "(register_operand (operands[0], VOIDmode) || CONSTANT_P (operands[0]))"
    "*{
    if (which_alternative==0)
@@ -322,7 +326,7 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
 +    }
    else if (which_alternative==1)
      {
-       if (AVR_ENHANCED)
+       if (AVR_HAVE_MOVW)
 -	return (AS2 (movw, r30, %1) CR_TAB
 -		\"icall\");
 +        {
@@ -353,7 +357,6 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
 -  return (AS2 (ldi, r30, lo8(%1)) CR_TAB
 -          AS2 (ldi, r31, hi8(%1)) CR_TAB
 -          \"icall\");
-+
 +  if (AVR_3_BYTE_PC)
 +    return (AS2 (ldi, r30, lo8(%1)) CR_TAB
 +            AS2 (ldi, r31, hi8(%1)) CR_TAB
@@ -361,11 +364,11 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
 +  else
 +    return (AS2 (ldi, r30, lo8(%1)) CR_TAB
 +            AS2 (ldi, r31, hi8(%1)) CR_TAB
-+            \"icall\");
++            \"icall\");    
  }"
    [(set_attr "cc" "clobber,clobber,clobber,clobber")
     (set_attr_alternative "length"
-@@ -2169,13 +2218,20 @@
+@@ -2181,13 +2227,20 @@
  ; indirect jump
  (define_insn "indirect_jump"
    [(set (pc) (match_operand:HI 0 "register_operand" "!z,*r"))]
@@ -387,8 +390,8 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
  ;; table jump
  
  ;; Table made from "rjmp" instructions for <=8K devices.
-@@ -2183,7 +2239,7 @@
-   [(set (pc) (unspec:HI [(match_operand:HI 0 "register_operand" "!z,*r")] 1))
+@@ -2196,7 +2249,7 @@
+ 			UNSPEC_INDEX_JMP))
     (use (label_ref (match_operand 1 "" "")))
     (clobber (match_dup 0))]
 -  "!AVR_MEGA"
@@ -396,7 +399,7 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
    "@
  	ijmp
  	push %A0\;push %B0\;ret"
-@@ -2200,11 +2256,26 @@
+@@ -2214,12 +2267,27 @@
    [(set_attr "length" "2")
     (set_attr "cc" "clobber")])
  
@@ -407,16 +410,17 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
 +   (clobber (match_dup 0))]
 +  "AVR_MEGA && AVR_ENHANCED && AVR_3_BYTE_PC"
 +  "lsl r30
-+	rol r31
-+	lpm __tmp_reg__,Z+
-+	lpm r31,Z
-+	mov r30,__tmp_reg__
-+	eijmp"
++        rol r31
++        lpm __tmp_reg__,Z+
++        lpm r31,Z
++        mov r30,__tmp_reg__
++        eijmp"
 +  [(set_attr "length" "6")
 +   (set_attr "cc" "clobber")])
 +
  (define_insn "*tablejump_enh"
-   [(set (pc) (unspec:HI [(match_operand:HI 0 "register_operand" "z")] 1))
+   [(set (pc) (unspec:HI [(match_operand:HI 0 "register_operand" "z")]
+ 			UNSPEC_INDEX_JMP))
     (use (label_ref (match_operand 1 "" "")))
     (clobber (match_dup 0))]
 -  "AVR_MEGA && AVR_ENHANCED"
@@ -424,8 +428,8 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
    "lsl r30
  	rol r31
  	lpm __tmp_reg__,Z+
-@@ -2218,7 +2289,7 @@
-   [(set (pc) (unspec:HI [(match_operand:HI 0 "register_operand" "z")] 1))
+@@ -2234,7 +2302,7 @@
+ 			UNSPEC_INDEX_JMP))
     (use (label_ref (match_operand 1 "" "")))
     (clobber (match_dup 0))]
 -  "AVR_MEGA"
@@ -433,9 +437,9 @@ diff -ur gcc/config/avr/avr.md gcc-4.1.1-new-devices-m256/gcc/config/avr/avr.md
    "lsl r30
  	rol r31
  	lpm
-diff -ur gcc/config/avr/libgcc.S gcc-4.1.1-new-devices-m256/gcc/config/avr/libgcc.S
---- gcc/config/avr/libgcc.S	2005-06-25 03:22:41.000000000 +0200
-+++ gcc/config/avr/libgcc.S	2006-09-07 20:49:56.232366466 +0200
+diff -uNdr gcc-4.2.2/gcc/config/avr-old/libgcc.S gcc-4.2.2/gcc/config/avr/libgcc.S
+--- gcc-4.2.2/gcc/config/avr-old/libgcc.S	2006-06-19 17:04:27.000000000 +0200
++++ gcc-4.2.2/gcc/config/avr/libgcc.S	2007-10-20 18:12:15.000000000 +0200
 @@ -593,7 +593,12 @@
  	out	__SP_H__,r29
  	out	__SREG__,__tmp_reg__
@@ -472,21 +476,21 @@ diff -ur gcc/config/avr/libgcc.S gcc-4.1.1-new-devices-m256/gcc/config/avr/libgc
  	ret
  #endif
  	.endfunc
-diff -ur gcc/config/avr/t-avr gcc-4.1.1-new-devices-m256/gcc/config/avr/t-avr
---- gcc/config/avr/t-avr	2006-09-07 20:19:07.299181718 +0200
-+++ gcc/config/avr/t-avr	2006-09-07 20:49:56.273363433 +0200
+diff -uNdr gcc-4.2.2/gcc/config/avr-old/t-avr gcc-4.2.2/gcc/config/avr/t-avr
+--- gcc-4.2.2/gcc/config/avr-old/t-avr	2007-04-27 22:53:57.000000000 +0200
++++ gcc-4.2.2/gcc/config/avr/t-avr	2007-10-20 18:12:15.000000000 +0200
 @@ -37,8 +37,8 @@
  
  FPBIT = fp-bit.c
  
--MULTILIB_OPTIONS = mmcu=avr2/mmcu=avr3/mmcu=avr4/mmcu=avr5
--MULTILIB_DIRNAMES = avr2 avr3 avr4 avr5
-+MULTILIB_OPTIONS = mmcu=avr2/mmcu=avr3/mmcu=avr4/mmcu=avr5/mmcu=avr6
-+MULTILIB_DIRNAMES = avr2 avr3 avr4 avr5 avr6
+-MULTILIB_OPTIONS = mmcu=avr2/mmcu=avr25/mmcu=avr3/mmcu=avr4/mmcu=avr5
+-MULTILIB_DIRNAMES = avr2 avr25 avr3 avr4 avr5
++MULTILIB_OPTIONS = mmcu=avr2/mmcu=avr25/mmcu=avr3/mmcu=avr4/mmcu=avr5/mmcu=avr6
++MULTILIB_DIRNAMES = avr2 avr25 avr3 avr4 avr5 avr6
  
  # The many avr2 matches are not listed here - this is the default.
  MULTILIB_MATCHES = \
-@@ -90,7 +90,9 @@
+@@ -111,7 +111,9 @@
  	mmcu?avr5=mmcu?at90usb647 \
  	mmcu?avr5=mmcu?at90usb1286 \
  	mmcu?avr5=mmcu?at90usb1287 \
