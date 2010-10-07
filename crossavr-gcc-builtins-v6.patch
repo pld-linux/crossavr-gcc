@@ -1,7 +1,5 @@
-Index: gcc/config/avr/predicates.md
-===================================================================
---- gcc/config/avr/predicates.md	(revision 134489)
-+++ gcc/config/avr/predicates.md	(working copy)
+--- ./gcc/config/avr/predicates.md.orig	2007-08-02 12:49:31.000000000 +0200
++++ ./gcc/config/avr/predicates.md	2010-03-05 15:25:53.000000000 +0100
 @@ -27,6 +27,11 @@
    (and (match_code "reg")
         (match_test "REGNO (op) >= 16 && REGNO (op) <= 31")))
@@ -14,9 +12,9 @@ Index: gcc/config/avr/predicates.md
  (define_predicate "even_register_operand"
    (and (match_code "reg")
         (and (match_test "REGNO (op) <= 31")
---- gcc/config/avr/avr.md.orig	2008-12-02 12:44:25.418762100 -0700
-+++ gcc/config/avr/avr.md	2008-12-02 15:31:40.788948300 -0700
-@@ -49,12 +49,26 @@
+--- ./gcc/config/avr/avr.md.orig	2010-03-05 15:20:25.000000000 +0100
++++ ./gcc/config/avr/avr.md	2010-03-05 15:25:53.000000000 +0100
+@@ -52,12 +52,26 @@
     
     (UNSPEC_STRLEN	0)
     (UNSPEC_INDEX_JMP	1)
@@ -48,7 +46,7 @@ Index: gcc/config/avr/predicates.md
  
  (include "predicates.md")
  (include "constraints.md")
-@@ -2537,13 +2551,6 @@
+@@ -2541,13 +2555,6 @@
  					(const_int 1))
  			  (const_int 3)])])
  
@@ -62,7 +60,7 @@ Index: gcc/config/avr/predicates.md
  ; indirect jump
  (define_insn "indirect_jump"
    [(set (pc) (match_operand:HI 0 "register_operand" "!z,*r"))]
-@@ -2923,7 +2930,7 @@
+@@ -2925,7 +2932,7 @@
  
  ;; Enable Interrupts
  (define_insn "enable_interrupt"
@@ -71,7 +69,7 @@ Index: gcc/config/avr/predicates.md
    ""
    "sei"
    [(set_attr "length" "1")
-@@ -2932,7 +2939,7 @@
+@@ -2934,7 +2941,7 @@
  
  ;; Disable Interrupts
  (define_insn "disable_interrupt"
@@ -80,7 +78,7 @@ Index: gcc/config/avr/predicates.md
    ""
    "cli"
    [(set_attr "length" "1")
-@@ -3032,3 +3039,219 @@
+@@ -3034,3 +3041,219 @@
      expand_epilogue (); 
      DONE;
    }")
@@ -300,8 +298,8 @@ Index: gcc/config/avr/predicates.md
 +  [(set_attr "length" "3")
 +   (set_attr "cc" "clobber")])
 +
---- gcc/config/avr/avr.c.orig	2008-12-01 10:51:45.062273700 -0700
-+++ gcc/config/avr/avr.c	2008-12-01 11:18:33.980387900 -0700
+--- ./gcc/config/avr/avr.c.orig	2010-03-05 15:24:52.000000000 +0100
++++ ./gcc/config/avr/avr.c	2010-03-05 15:25:53.000000000 +0100
 @@ -30,6 +30,7 @@
  #include "insn-config.h"
  #include "conditions.h"
@@ -320,7 +318,7 @@ Index: gcc/config/avr/predicates.md
  #include "tm_p.h"
  #include "target.h"
  #include "target-def.h"
-@@ -83,6 +86,9 @@ static bool avr_rtx_costs (rtx, int, int
+@@ -87,6 +90,9 @@
  static int avr_address_cost (rtx);
  static bool avr_return_in_memory (const_tree, const_tree);
  static struct machine_function * avr_init_machine_status (void);
@@ -330,7 +328,7 @@ Index: gcc/config/avr/predicates.md
  /* Allocate registers from r25 to r8 for parameters for function calls.  */
  #define FIRST_CUM_REG 26
  
-@@ -373,6 +379,12 @@ int avr_case_values_threshold = 30000;
+@@ -340,6 +346,12 @@
  #undef TARGET_STRICT_ARGUMENT_NAMING
  #define TARGET_STRICT_ARGUMENT_NAMING hook_bool_CUMULATIVE_ARGS_true
  
@@ -343,7 +341,7 @@ Index: gcc/config/avr/predicates.md
  struct gcc_target targetm = TARGET_INITIALIZER;
  
  void
-@@ -6258,4 +6270,237 @@ avr_return_in_memory (const_tree type, c
+@@ -6079,4 +6091,237 @@
      return false;
  }
  

@@ -9,33 +9,26 @@ Summary(pl.UTF-8):	Skrośne narzędzia programistyczne GNU dla AVR - gcc
 Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
-Version:	4.3.3
+Version:	4.3.5
 Release:	1
-Patch0:		%{name}-attribute_alias.patch
-Patch1:		%{name}-dwarf.patch
-Patch2:		%{name}-libiberty-Makefile.in.patch
-Patch3:		%{name}-bug-11259-v3.patch
-Patch4:		%{name}-bug-spill-v4.patch
-Patch5:		%{name}-bug-35013.patch
-Patch6:		%{name}-libgcc16.patch
-Patch7:		%{name}-bug-33009.patch
-Patch8:		%{name}-mega256.patch
-Patch9:		%{name}-mega256-additional.patch
-Patch10:	%{name}-xmega-v9.patch
-Patch11:	%{name}-xmega2.patch
-Patch12:	%{name}-atmega32m1.patch
-Patch13:	%{name}-atmega32c1.patch
-Patch14:	%{name}-atmega32u4.patch
-Patch15:	%{name}-attiny167.patch
-Patch16:	%{name}-attiny13a.patch
-Patch17:	%{name}-atmega32u6.patch
-Patch18:	%{name}-osmain.patch
-Patch19:	%{name}-builtins-v6.patch
+Patch0:		crossavr-gcc-bug-11259-v3.patch
+Patch1:		crossavr-gcc-bug-18145.patch
+Patch2:		crossavr-gcc-bug-19636-24894-31644-31786.patch
+Patch3:		crossavr-gcc-bug-33009.patch
+Patch4:		crossavr-gcc-bug-34210-35508.patch
+Patch5:		crossavr-gcc-bug-35013.patch
+Patch6:		crossavr-gcc-builtins-v6.patch
+Patch7:		crossavr-gcc-libgcc.patch
+Patch8:		crossavr-gcc-libiberty-Makefile.in.patch
+Patch9:		crossavr-gcc-new-devices.patch
+Patch10:	crossavr-gcc-param-inline-call-cost.patch
+Patch11:	crossavr-gcc-xmega.patch
+Patch12:	crossavr-gcc-osmain.patch
 Epoch:		1
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	cc3c5565fdb9ab87a05ddb106ba0bd1f
+# Source0-md5:	e588cfde3bf323f82918589b94f14a15
 BuildRequires:	/bin/bash
 BuildRequires:	autoconf
 BuildRequires:	bison
@@ -93,13 +86,6 @@ Ten pakiet dodaje obsługę C++ do kompilatora gcc dla AVR.
 %patch10 -p0
 %patch11 -p0
 %patch12 -p0
-%patch13 -p0
-%patch14 -p0
-%patch15 -p0
-%patch16 -p0
-%patch17 -p0
-%patch18 -p0
-%patch19 -p0
 
 %build
 rm -rf obj-%{target}
