@@ -36,6 +36,7 @@ BuildRequires:	crossavr-binutils
 BuildRequires:	flex
 BuildRequires:	gmp-devel >= 4.1
 BuildRequires:	mpfr-devel >= 2.3.0
+BuildRequires:	perl-tools-pod
 Requires:	crossavr-binutils >= 2.15.91.0.2
 %{!?with_bootstrap:Requires:	crossavr-libc}
 Requires:	gcc-dirs
