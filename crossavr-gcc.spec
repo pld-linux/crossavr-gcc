@@ -10,7 +10,7 @@ Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AV
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
 Version:	4.3.5
-Release:	1
+Release:	2
 Patch0:		crossavr-gcc-bug-11259-v3.patch
 Patch1:		crossavr-gcc-bug-18145.patch
 Patch2:		crossavr-gcc-bug-19636-24894-31644-31786.patch
