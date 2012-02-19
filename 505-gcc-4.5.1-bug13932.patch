@@ -1,0 +1,12 @@
+diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
+--- gcc/config/avr/avr-devices.c	2011-12-14 18:10:15.000000000 +0530
++++ gcc/config/avr/avr-devices.c	2011-12-14 18:12:49.000000000 +0530
+@@ -259,7 +259,7 @@ const struct mcu_type_s avr_mcu_types[] 
+      /* Enhanced, ==256K + 3-Byte PC +
+         { MOVW/LPMX, JMP/CALL, MUL, ELPM, ELPMX, EIJMP/EICALL }.  */
+   { "avr6",                 ARCH_AVR6, NULL,                        0, 0x0200, "m2561" },
+-  { "atmega2560",           ARCH_AVR6, "__AVR_ATmega2560__",        0, 0x0200, "m2561" },
++  { "atmega2560",           ARCH_AVR6, "__AVR_ATmega2560__",        0, 0x0200, "m2560" },
+   { "atmega2561",           ARCH_AVR6, "__AVR_ATmega2561__",        0, 0x0200, "m2561" },
+   { "atmega256rfa2",        ARCH_AVR6, "__AVR_ATmega256RFA2__",     0, 0x0200, "m256rfa2" },
+   { "atmega256rfr2",        ARCH_AVR6, "__AVR_ATmega256RFR2__",     0, 0x0200, "m256rfr2" },

@@ -1,0 +1,22 @@
+diff -Naurp ./gcc/config/avr/avr-devices.c ./gcc/config/avr/avr-devices.c
+--- ./gcc/config/avr/avr-devices.c	2011-06-21 12:25:28.000000000 +0530
++++ ./gcc/config/avr/avr-devices.c	2011-06-21 12:30:08.000000000 +0530
+@@ -148,6 +148,7 @@ const struct mcu_type_s avr_mcu_types[] 
+   { "atmega165",            ARCH_AVR5, "__AVR_ATmega165__",         0, 0x0100, "m165" },
+   { "atmega165a",           ARCH_AVR5, "__AVR_ATmega165A__",        0, 0x0100, "m165a" },
+   { "atmega165p",           ARCH_AVR5, "__AVR_ATmega165P__",        0, 0x0100, "m165p" },
++  { "atmega165pa",          ARCH_AVR5, "__AVR_ATmega165PA__",       0, 0x0100, "m165pa" },
+   { "atmega168",            ARCH_AVR5, "__AVR_ATmega168__",         0, 0x0100, "m168" },
+   { "atmega168a",           ARCH_AVR5, "__AVR_ATmega168A__",        0, 0x0100, "m168a" },
+   { "atmega168p",           ARCH_AVR5, "__AVR_ATmega168P__",        0, 0x0100, "m168p" },
+diff -Naurp ./gcc/config/avr/t-avr ./gcc/config/avr/t-avr
+--- ./gcc/config/avr/t-avr	2011-06-21 12:25:28.000000000 +0530
++++ ./gcc/config/avr/t-avr	2011-06-21 12:31:55.000000000 +0530
+@@ -182,6 +182,7 @@ MULTILIB_MATCHES = \
+ 	mmcu?avr5=mmcu?atmega165 \
+ 	mmcu?avr5=mmcu?atmega165a \
+ 	mmcu?avr5=mmcu?atmega165p \
++	mmcu?avr5=mmcu?atmega165pa \
+ 	mmcu?avr5=mmcu?atmega168 \
+ 	mmcu?avr5=mmcu?atmega168a \
+ 	mmcu?avr5=mmcu?atmega168p \

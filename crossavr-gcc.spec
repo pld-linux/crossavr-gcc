@@ -9,32 +9,64 @@ Summary(pl.UTF-8):	Skrośne narzędzia programistyczne GNU dla AVR - gcc
 Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
-Version:	4.3.5
-Release:	2
-Patch0:		crossavr-gcc-bug-11259-v3.patch
-Patch1:		crossavr-gcc-bug-18145.patch
-Patch2:		crossavr-gcc-bug-19636-24894-31644-31786.patch
-Patch3:		crossavr-gcc-bug-33009.patch
-Patch4:		crossavr-gcc-bug-34210-35508.patch
-Patch5:		crossavr-gcc-bug-35013.patch
-Patch6:		crossavr-gcc-builtins-v6.patch
-Patch7:		crossavr-gcc-libgcc.patch
-Patch8:		crossavr-gcc-libiberty-Makefile.in.patch
-Patch9:		crossavr-gcc-new-devices.patch
-Patch10:	crossavr-gcc-param-inline-call-cost.patch
-Patch11:	crossavr-gcc-xmega.patch
-Patch12:	crossavr-gcc-osmain.patch
+Version:	4.5.3
+Release:	1
 Epoch:		1
+# Patches 1xx are taken form Atmel official AVR8-GNU toolchain version 3.3.1.481.
+Patch100:	200-gcc-4.5.1-libiberty-Makefile.in.patch
+Patch101:	300-gcc-4.5.1-fixedpoint-3-4-2010.patch
+Patch102:	301-gcc-4.5.1-xmega-v14.patch
+Patch103:	302-gcc-4.5.1-avrtiny10.patch
+Patch104:	303-gcc-4.5.1-osmain.patch
+Patch105:	304-gcc-4.5.1-builtins-v6.patch
+Patch106:	305-gcc-4.5.1-avrtiny10-non-fixedpoint.patch
+Patch107:	306-gcc-4.5.1-option-list-devices.patch
+Patch108:	400-gcc-4.5.1-new-devices.patch
+Patch109:	401-gcc-4.5.1-atmega32_5_50_90_pa.patch
+Patch110:	402-gcc-4.5.1-attiny1634.patch
+Patch111:	403-gcc-4.5.1-atmega48pa.patch
+Patch112:	404-gcc-4.5.1-atxmega_16_32_a4u.patch
+Patch113:	405-gcc-4.5.1-atxmega64_128_192_256a3u.patch
+Patch114:	406-gcc-4.5.1-atmegarfr2_a2.patch
+Patch115:	407-gcc-4.5.1-atmega165pa.patch
+Patch116:	408-gcc-4.5.1-atxmega384c3.patch
+Patch117:	409-gcc-4.5.1-attiny80.patch
+Patch118:	410-gcc-4.5.1-atxmega128a4u.patch
+Patch119:	411-gcc-4.5.1-atxmega64d4.patch
+Patch120:	412-gcc-4.5.1-atmega164pa_168pa_32a_64a.patch
+Patch121:	413-gcc-4.5.1-atxmega32x1.patch
+Patch122:	414-gcc-4.5.1-atxmega64_128_b3.patch
+Patch123:	415-gcc-4.5.1-atxmega64b1.patch
+Patch124:	416-gcc-4.5.1-atmega_8a_128a_1284.patch
+Patch125:	417-gcc-4.5.1-atxmega64a4u.patch
+Patch126:	418-gcc-4.5.1-atxmega128d4.patch
+Patch127:	419-gcc-4.5.1-atmxt336s.patch
+Patch128:	420-gcc-4.5.1-atxmega16c4_32c4_128c3_256c3.patch
+Patch129:	421-gcc-4.5.1-atxmega384d3.patch
+Patch130:	422-gcc-4.5.1-atmega48hvf.patch
+Patch131:	423-gcc-4.5.1-atmega26hvg.patch
+Patch132:	424-gcc-4.5.1-atmxt224_224e.patch
+Patch133:	424-gcc-4.5.1-atxmega192c3.patch
+Patch134:	500-gcc-4.5.1-bug13473.patch
+Patch135:	501-gcc-4.5.1-bug13579.patch
+Patch136:	502-gcc-4.5.1-bug-18145-v4.patch
+Patch137:	503-gcc-4.5.1-avrtiny10-bug-12510.patch
+Patch138:	504-gcc-4.5.1-bug12915.patch
+Patch139:	505-gcc-4.5.1-bug13932.patch
+Patch140:	506-gcc-4.5.1-bug13789.patch
+Patch141:	507-gcc-4.5.1-bug14415.patch
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	e588cfde3bf323f82918589b94f14a15
+# Source0-md5:	8e0b5c12212e185f3e4383106bfa9cc6
 BuildRequires:	/bin/bash
 BuildRequires:	autoconf
 BuildRequires:	bison
 BuildRequires:	crossavr-binutils
+BuildRequires:	elfutils-devel >= 0.145-1
 BuildRequires:	flex
 BuildRequires:	gmp-devel >= 4.1
+BuildRequires:	libmpc-devel
 BuildRequires:	mpfr-devel >= 2.3.0
 BuildRequires:	perl-tools-pod
 Requires:	crossavr-binutils >= 2.15.91.0.2
@@ -74,19 +106,48 @@ Ten pakiet dodaje obsługę C++ do kompilatora gcc dla AVR.
 
 %prep
 %setup -q -n gcc-%{version}
-%patch0 -p0
-%patch1 -p0
-%patch2 -p0
-%patch3 -p0
-%patch4 -p0
-%patch5 -p0
-%patch6 -p0
-%patch7 -p0
-%patch8 -p0
-%patch9 -p0
-%patch10 -p0
-%patch11 -p0
-%patch12 -p0
+%patch100 -p0
+%patch101 -p0
+%patch102 -p0
+%patch103 -p0
+%patch104 -p0
+%patch105 -p0
+%patch106 -p0
+%patch107 -p0
+%patch108 -p0
+%patch109 -p0
+%patch110 -p0
+%patch111 -p0
+%patch112 -p0
+%patch113 -p0
+%patch114 -p0
+%patch115 -p0
+%patch116 -p0
+%patch117 -p0
+%patch118 -p0
+%patch119 -p0
+%patch120 -p0
+%patch121 -p0
+%patch122 -p0
+%patch123 -p0
+%patch124 -p0
+%patch125 -p0
+%patch126 -p0
+%patch127 -p0
+%patch128 -p0
+%patch129 -p0
+%patch130 -p0
+%patch131 -p0
+%patch132 -p0
+%patch133 -p0
+%patch134 -p0
+%patch135 -p0
+%patch136 -p0
+%patch137 -p0
+%patch138 -p0
+%patch139 -p0
+%patch140 -p0
+%patch141 -p0
 
 %build
 rm -rf obj-%{target}
@@ -103,9 +164,12 @@ TEXCONFIG=false \
 	--bindir=%{_bindir} \
 	--libdir=%{_libdir} \
 	--libexecdir=%{_libdir} \
+	--enable-c99 \
+	--enable-languages="c,c++" \
+	--enable-long-long \
+	--enable-lto \
 	--disable-shared \
 	--disable-libssp \
-	--enable-languages="c,c++" \
 	--with-dwarf2 \
 	--with-gnu-as \
 	--with-gnu-ld \
@@ -154,8 +218,11 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{gcclib}
 %attr(755,root,root) %{gcclib}/cc1
 %attr(755,root,root) %{gcclib}/collect2
+%attr(755,root,root) %{gcclib}/lto-wrapper
+%attr(755,root,root) %{gcclib}/lto1
 %{gcclib}/libg*.a
 %{gcclib}/%{target}*
+%{gcclib}/plugin
 %dir %{gcclib}/include
 %{gcclib}/include/*.h
 %{_mandir}/man1/%{target}-cpp.1*
