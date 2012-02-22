@@ -69,6 +69,8 @@ BuildRequires:	gmp-devel >= 4.1
 BuildRequires:	libmpc-devel
 BuildRequires:	mpfr-devel >= 2.3.0
 BuildRequires:	perl-tools-pod
+BuildRequires:	rpmbuild(macros) >= 1.565
+BuildRequires:	sed >= 4.0
 Requires:	crossavr-binutils >= 2.15.91.0.2
 %{!?with_bootstrap:Requires:	crossavr-libc}
 Requires:	gcc-dirs
@@ -106,6 +108,7 @@ Ten pakiet dodaje obsługę C++ do kompilatora gcc dla AVR.
 
 %prep
 %setup -q -n gcc-%{version}
+cd gcc/config/%{target} && %undos -f c,h && cd -
 %patch100 -p0
 %patch101 -p0
 %patch102 -p0
