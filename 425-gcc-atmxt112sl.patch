@@ -1,0 +1,22 @@
+diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
+--- gcc/config/avr/avr-devices.c	2012-02-10 20:23:45.000000000 +0530
++++ gcc/config/avr/avr-devices.c	2012-02-10 20:24:34.000000000 +0530
+@@ -267,6 +267,7 @@ const struct mcu_type_s avr_mcu_types[] 
+     /* Xmega, <= 8K FLASH.  */
+     /* Xmega, > 8K, <= 64K FLASH, <= 64K RAM.  */
+   { "avrxmega2",    ARCH_AVRXMEGA2, NULL,                           0, 0x2000, "x32a4" },
++  { "atmxt112sl",   ARCH_AVRXMEGA2, "__AVR_ATMXT112SL__",           0, 0x2000, "mxt112sl"},
+   { "atmxt224",     ARCH_AVRXMEGA2, "__AVR_ATMXT224__",             0, 0x2000, "mxt224"},
+   { "atmxt224e",    ARCH_AVRXMEGA2, "__AVR_ATMXT224E__",            0, 0x2000, "mxt224e"},
+   { "atmxt336s",    ARCH_AVRXMEGA2, "__AVR_ATMXT336S__",            0, 0x2000, "mxt336s"},
+diff -Naurp gcc/config/avr/t-avr gcc/config/avr/t-avr
+--- gcc/config/avr/t-avr	2012-02-10 20:23:45.000000000 +0530
++++ gcc/config/avr/t-avr	2012-02-10 20:24:34.000000000 +0530
+@@ -281,6 +281,7 @@ MULTILIB_MATCHES = \
+ 	mmcu?avr6=mmcu?atmega256rfr2 \
+  	mmcu?avr6=mmcu?atmega2560 \
+ 	mmcu?avr6=mmcu?atmega2561 \
++	mmcu?avrxmega2=mmcu?atmxt112sl \
+ 	mmcu?avrxmega2=mmcu?atmxt224 \
+ 	mmcu?avrxmega2=mmcu?atmxt224e \
+ 	mmcu?avrxmega2=mmcu?atmxt336s \

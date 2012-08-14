@@ -1,0 +1,22 @@
+diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
+--- gcc/config/avr/avr-devices.c	2011-10-28 14:31:05.000000000 +0530
++++ gcc/config/avr/avr-devices.c	2011-10-28 14:34:49.000000000 +0530
+@@ -275,6 +275,7 @@ const struct mcu_type_s avr_mcu_types[] 
+   { "avrxmega4",    ARCH_AVRXMEGA4, NULL,                           0, 0x2000, "x64d3" },
+   { "atxmega64a3",  ARCH_AVRXMEGA4, "__AVR_ATxmega64A3__",          0, 0x2000, "x64a3" },
+   { "atxmega64a3u", ARCH_AVRXMEGA4, "__AVR_ATxmega64A3U__",         0, 0x2000, "x64a3u"},
++  { "atxmega64b1",  ARCH_AVRXMEGA4, "__AVR_ATxmega64B1__",          0, 0x2000, "x64b1" },
+   { "atxmega64b3",  ARCH_AVRXMEGA4, "__AVR_ATxmega64B3__",          0, 0x2000, "x64b3"},
+   { "atxmega64d3",  ARCH_AVRXMEGA4, "__AVR_ATxmega64D3__",          0, 0x2000, "x64d3" },
+   { "atxmega64d4",  ARCH_AVRXMEGA4, "__AVR_ATxmega64D4__",          0, 0x2000, "x64d4" },
+diff -Naurp gcc/config/avr/t-avr gcc/config/avr/t-avr
+--- gcc/config/avr/t-avr	2011-10-28 14:31:05.000000000 +0530
++++ gcc/config/avr/t-avr	2011-10-28 14:34:49.000000000 +0530
+@@ -285,6 +285,7 @@ MULTILIB_MATCHES = \
+ 	mmcu?avrxmega2=mmcu?atxmega32x1 \
+ 	mmcu?avrxmega4=mmcu?atxmega64a3 \
+ 	mmcu?avrxmega4=mmcu?atxmega64a3u \
++	mmcu?avrxmega4=mmcu?atxmega64b1 \
+ 	mmcu?avrxmega4=mmcu?atxmega64b3 \
+ 	mmcu?avrxmega4=mmcu?atxmega64d3 \
+ 	mmcu?avrxmega4=mmcu?atxmega64d4 \

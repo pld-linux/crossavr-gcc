@@ -1,0 +1,50 @@
+diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
+--- gcc/config/avr/avr.c	2011-10-27 18:05:35.000000000 +0530
++++ gcc/config/avr/avr.c	2011-10-27 18:10:00.000000000 +0530
+@@ -255,6 +255,8 @@ static const struct default_options avr_
+ #undef TARGET_EXPAND_BUILTIN
+ #define TARGET_EXPAND_BUILTIN avr_expand_builtin
+ 
++#undef TARGET_HELP
++#define TARGET_HELP avr_target_help
+ 
+  /* Implement TARGET_SCALAR_MODE_SUPPORTED_P.  */
+  static bool
+@@ -276,7 +278,24 @@ static const struct default_options avr_
+    return default_fixed_point_supported_p ();
+  }
+  
+- 
++/* Implement TARGET_HELP.  */
++void
++avr_target_help (void)
++{
++   if (avr_list_supported_parts)
++      {
++        const struct mcu_type_s *list_part;
++        fprintf (stdout, "List of parts supported by avr-gcc:\n");
++        for (list_part = &avr_mcu_types[0]; (list_part + 1)->name; list_part++)
++          {
++            if (!list_part->macro)
++               list_part++;
++            fprintf (stdout, "%-20s%s\n", list_part->name, list_part->macro);
++          }
++         fprintf (stdout, "\n");
++      }
++}
++
+ struct gcc_target targetm = TARGET_INITIALIZER;
+ 
+ static void
+diff -Naurp gcc/config/avr/avr.opt gcc/config/avr/avr.opt
+--- gcc/config/avr/avr.opt	2011-10-27 18:05:13.000000000 +0530
++++ gcc/config/avr/avr.opt	2011-10-27 18:10:00.000000000 +0530
+@@ -58,3 +58,8 @@ Relax branches
+ mpmem-wrap-around
+ Target Report
+ Make the linker relaxation machine assume that a program counter wrap-around occurs.
++
++mlist-devices
++Target RejectNegative Var(avr_list_supported_parts)
++Print the list of parts supported while printing --target-help
++

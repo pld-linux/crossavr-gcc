@@ -1,0 +1,60 @@
+diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
+--- gcc/config/avr/avr-devices.c	2011-11-08 17:00:35.000000000 +0530
++++ gcc/config/avr/avr-devices.c	2011-11-08 17:04:10.000000000 +0530
+@@ -268,9 +268,11 @@ const struct mcu_type_s avr_mcu_types[] 
+   { "atmxt336s",    ARCH_AVRXMEGA2, "__AVR_ATMXT336S__",            0, 0x2000, "mxt336s"},
+   { "atxmega16a4",  ARCH_AVRXMEGA2, "__AVR_ATxmega16A4__",          0, 0x2000, "x16a4" },
+   { "atxmega16a4u",  ARCH_AVRXMEGA2, "__AVR_ATxmega16A4U__",        0, 0x2000, "x16a4u" },
++  { "atxmega16c4",  ARCH_AVRXMEGA2, "__AVR_ATxmega16C4__",          0, 0x2000, "x16c4" },
+   { "atxmega16d4",  ARCH_AVRXMEGA2, "__AVR_ATxmega16D4__",          0, 0x2000, "x16d4" },
+   { "atxmega32a4",  ARCH_AVRXMEGA2, "__AVR_ATxmega32A4__",          0, 0x2000, "x32a4" },
+   { "atxmega32a4u",  ARCH_AVRXMEGA2, "__AVR_ATxmega32A4U__",        0, 0x2000, "x32a4u" },
++  { "atxmega32c4",  ARCH_AVRXMEGA2, "__AVR_ATxmega32C4__",          0, 0x2000, "x32c4" },
+   { "atxmega32d4",  ARCH_AVRXMEGA2, "__AVR_ATxmega32D4__",          0, 0x2000, "x32d4" },
+   { "atxmega32x1",  ARCH_AVRXMEGA2, "__AVR_ATxmega32X1__",          0, 0x2000, "x32x1" },
+     /* Xmega, > 8K, <= 64K FLASH, > 64K RAM.  */
+@@ -294,6 +296,7 @@ const struct mcu_type_s avr_mcu_types[] 
+   { "atxmega128a3u",ARCH_AVRXMEGA6, "__AVR_ATxmega128A3U__",        0, 0x2000, "x128a3u"},
+   { "atxmega128b1", ARCH_AVRXMEGA6, "__AVR_ATxmega128B1__",         0, 0x2000, "x128b1" },
+   { "atxmega128b3", ARCH_AVRXMEGA6, "__AVR_ATxmega128B3__",         0, 0x2000, "x128b3" },
++  { "atxmega128c3", ARCH_AVRXMEGA6, "__AVR_ATxmega128C3__",         0, 0x2000, "x128c3" },
+   { "atxmega128d3", ARCH_AVRXMEGA6, "__AVR_ATxmega128D3__",         0, 0x2000, "x128d3" },
+   { "atxmega128d4", ARCH_AVRXMEGA6, "__AVR_ATxmega128D4__",         0, 0x2000, "x128d4" },
+   { "atxmega192a3", ARCH_AVRXMEGA6, "__AVR_ATxmega192A3__",         0, 0x2000, "x192a3" },
+@@ -303,6 +306,7 @@ const struct mcu_type_s avr_mcu_types[] 
+   { "atxmega256a3u",ARCH_AVRXMEGA6, "__AVR_ATxmega256A3U__",        0, 0x2000, "x256a3u"},
+   { "atxmega256a3b",ARCH_AVRXMEGA6, "__AVR_ATxmega256A3B__",        0, 0x2000, "x256a3b" },
+   { "atxmega256a3bu", ARCH_AVRXMEGA6, "__AVR_ATxmega256A3BU__",     0, 0x2000, "x256a3bu" },
++  { "atxmega256c3", ARCH_AVRXMEGA6, "__AVR_ATxmega256C3__",         0, 0x2000, "x256c3" },
+   { "atxmega256d3", ARCH_AVRXMEGA6, "__AVR_ATxmega256D3__",         0, 0x2000, "x256d3" },
+   { "atxmega384c3", ARCH_AVRXMEGA6, "__AVR_ATxmega384C3__",         0, 0x2000, "x384c3" },
+     /* Xmega, >= 128K FLASH, > 64K RAM.  */
+diff -Naurp gcc/config/avr/t-avr gcc/config/avr/t-avr
+--- gcc/config/avr/t-avr	2011-11-08 17:00:35.000000000 +0530
++++ gcc/config/avr/t-avr	2011-11-08 17:02:00.000000000 +0530
+@@ -282,7 +282,9 @@ MULTILIB_MATCHES = \
+ 	mmcu?avrxmega2=mmcu?atmxt336s \
+ 	mmcu?avrxmega2=mmcu?atxmega16a4 \
+ 	mmcu?avrxmega2=mmcu?atxmega16a4u \
++	mmcu?avrxmega2=mmcu?atxmega16c4 \
+ 	mmcu?avrxmega2=mmcu?atxmega16d4 \
++	mmcu?avrxmega2=mmcu?atxmega32c4 \
+ 	mmcu?avrxmega2=mmcu?atxmega32d4 \
+ 	mmcu?avrxmega2=mmcu?atxmega32a4 \
+ 	mmcu?avrxmega2=mmcu?atxmega32a4u \
+@@ -300,6 +302,7 @@ MULTILIB_MATCHES = \
+ 	mmcu?avrxmega6=mmcu?atxmega128a3u \
+ 	mmcu?avrxmega6=mmcu?atxmega128b1 \
+ 	mmcu?avrxmega6=mmcu?atxmega128b3 \
++	mmcu?avrxmega6=mmcu?atxmega128c3 \
+ 	mmcu?avrxmega6=mmcu?atxmega128d3 \
+ 	mmcu?avrxmega6=mmcu?atxmega128d4 \
+ 	mmcu?avrxmega6=mmcu?atxmega192a3 \
+@@ -309,6 +312,7 @@ MULTILIB_MATCHES = \
+ 	mmcu?avrxmega6=mmcu?atxmega256a3u \
+ 	mmcu?avrxmega6=mmcu?atxmega256a3b \
+ 	mmcu?avrxmega6=mmcu?atxmega256a3bu \
++	mmcu?avrxmega6=mmcu?atxmega256c3 \
+ 	mmcu?avrxmega6=mmcu?atxmega256d3 \
+ 	mmcu?avrxmega6=mmcu?atxmega384c3 \
+ 	mmcu?avrxmega7=mmcu?atxmega128a1 \

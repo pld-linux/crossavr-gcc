@@ -1,0 +1,47 @@
+diff -Naurp gcc/config/avr/avr.md gcc/config/avr/avr.md
+--- gcc/config/avr/avr.md	2012-04-13 11:19:25.000000000 +0530
++++ gcc/config/avr/avr.md	2012-04-13 13:21:49.000000000 +0530
+@@ -72,7 +72,8 @@
+    (UNSPECV_DELAY_CYCLES_1    101)
+    (UNSPECV_DELAY_CYCLES_2    102)
+    (UNSPECV_DELAY_CYCLES_3    103)
+-   (UNSPECV_DELAY_CYCLES_4    104)])
++   (UNSPECV_DELAY_CYCLES_4    104)
++   (UNSPECV_DELAY_CYCLES_2_TINY 105)])
+ 
+ (include "predicates.md")
+ (include "constraints.md")
+@@ -3370,7 +3371,12 @@
+       if (loop_count > 0xFFFF)
+         loop_count = 0xFFFF;
+       unsigned int cycles_used = (((loop_count - 1) * 4) + 5);
+-      emit_insn (gen_delay_cycles_2 (gen_int_mode (loop_count, HImode)));
++      if (AVR_TINY) {
++        emit_insn (gen_delay_cycles_2_tiny (gen_int_mode (loop_count, HImode)));
++      }
++      else {
++        emit_insn (gen_delay_cycles_2 (gen_int_mode (loop_count, HImode)));
++      }
+       cycles -= cycles_used;
+     }
+   if (IN_RANGE(cycles, 6, 767))
+@@ -3418,6 +3424,19 @@
+   [(set_attr "length" "4")
+    (set_attr "cc" "clobber")])
+ 
++(define_insn "delay_cycles_2_tiny"
++  [(unspec_volatile [(const_int 0)] UNSPECV_DELAY_CYCLES_2_TINY)
++   (match_operand:HI 0 "immediate_operand" "")
++   (clobber (match_scratch:HI 1 "=&d"))]
++  ""
++  " ldi %A1,lo8(%0)
++    ldi %B1,hi8(%0)
++    1:subi %A1,1
++    sbci %B1,0
++    brne 1b"
++  [(set_attr "length" "5")
++   (set_attr "cc" "clobber")])
++
+ (define_insn "delay_cycles_3"
+   [(unspec_volatile [(const_int 0)] UNSPECV_DELAY_CYCLES_3)
+    (match_operand:SI 0 "immediate_operand" "")

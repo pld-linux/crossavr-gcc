@@ -9,56 +9,60 @@ Summary(pl.UTF-8):	Skrośne narzędzia programistyczne GNU dla AVR - gcc
 Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AVR gcc
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
-Version:	4.5.3
+Version:	4.6.2
 Release:	1
 Epoch:		1
-# Patches 1xx are taken form Atmel official AVR8-GNU toolchain version 3.3.1.481.
-Patch100:	200-gcc-4.5.1-libiberty-Makefile.in.patch
-Patch101:	300-gcc-4.5.1-fixedpoint-3-4-2010.patch
-Patch102:	301-gcc-4.5.1-xmega-v14.patch
-Patch103:	302-gcc-4.5.1-avrtiny10.patch
-Patch104:	303-gcc-4.5.1-osmain.patch
-Patch105:	304-gcc-4.5.1-builtins-v6.patch
-Patch106:	305-gcc-4.5.1-avrtiny10-non-fixedpoint.patch
-Patch107:	306-gcc-4.5.1-option-list-devices.patch
-Patch108:	400-gcc-4.5.1-new-devices.patch
-Patch109:	401-gcc-4.5.1-atmega32_5_50_90_pa.patch
-Patch110:	402-gcc-4.5.1-attiny1634.patch
-Patch111:	403-gcc-4.5.1-atmega48pa.patch
-Patch112:	404-gcc-4.5.1-atxmega_16_32_a4u.patch
-Patch113:	405-gcc-4.5.1-atxmega64_128_192_256a3u.patch
-Patch114:	406-gcc-4.5.1-atmegarfr2_a2.patch
-Patch115:	407-gcc-4.5.1-atmega165pa.patch
-Patch116:	408-gcc-4.5.1-atxmega384c3.patch
-Patch117:	409-gcc-4.5.1-attiny80.patch
-Patch118:	410-gcc-4.5.1-atxmega128a4u.patch
-Patch119:	411-gcc-4.5.1-atxmega64d4.patch
-Patch120:	412-gcc-4.5.1-atmega164pa_168pa_32a_64a.patch
-Patch121:	413-gcc-4.5.1-atxmega32x1.patch
-Patch122:	414-gcc-4.5.1-atxmega64_128_b3.patch
-Patch123:	415-gcc-4.5.1-atxmega64b1.patch
-Patch124:	416-gcc-4.5.1-atmega_8a_128a_1284.patch
-Patch125:	417-gcc-4.5.1-atxmega64a4u.patch
-Patch126:	418-gcc-4.5.1-atxmega128d4.patch
-Patch127:	419-gcc-4.5.1-atmxt336s.patch
-Patch128:	420-gcc-4.5.1-atxmega16c4_32c4_128c3_256c3.patch
-Patch129:	421-gcc-4.5.1-atxmega384d3.patch
-Patch130:	422-gcc-4.5.1-atmega48hvf.patch
-Patch131:	423-gcc-4.5.1-atmega26hvg.patch
-Patch132:	424-gcc-4.5.1-atmxt224_224e.patch
-Patch133:	424-gcc-4.5.1-atxmega192c3.patch
-Patch134:	500-gcc-4.5.1-bug13473.patch
-Patch135:	501-gcc-4.5.1-bug13579.patch
-Patch136:	502-gcc-4.5.1-bug-18145-v4.patch
-Patch137:	503-gcc-4.5.1-avrtiny10-bug-12510.patch
-Patch138:	504-gcc-4.5.1-bug12915.patch
-Patch139:	505-gcc-4.5.1-bug13932.patch
-Patch140:	506-gcc-4.5.1-bug13789.patch
-Patch141:	507-gcc-4.5.1-bug14415.patch
+Patch1:		gcc-bug51969.patch
+# Patches 1xx are taken form Atmel official AVR8-GNU toolchain version 3.4.0.663.
+Patch100:	200-gcc-libiberty-Makefile.in.patch
+Patch101:	300-gcc-fixedpoint-3-4-2010.patch
+Patch102:	301-gcc-xmega-v14.patch
+Patch103:	302-gcc-avrtiny10.patch
+Patch104:	303-gcc-osmain.patch
+Patch105:	304-gcc-builtins-v6.patch
+Patch106:	305-gcc-avrtiny10-non-fixedpoint.patch
+Patch107:	306-gcc-option-list-devices.patch
+Patch108:	400-gcc-new-devices.patch
+Patch109:	401-gcc-atmega32_5_50_90_pa.patch
+Patch110:	402-gcc-attiny1634.patch
+Patch111:	403-gcc-atmega48pa.patch
+Patch112:	404-gcc-atxmega_16_32_a4u.patch
+Patch113:	405-gcc-atxmega64_128_192_256a3u.patch
+Patch114:	406-gcc-atmegarfr2_a2.patch
+Patch115:	407-gcc-atmega165pa.patch
+Patch116:	408-gcc-atxmega384c3.patch
+Patch117:	409-gcc-attiny80.patch
+Patch118:	410-gcc-atxmega128a4u.patch
+Patch119:	411-gcc-atxmega64d4.patch
+Patch120:	412-gcc-atmega164pa_168pa_32a_64a.patch
+Patch121:	413-gcc-atxmega64_128_b3.patch
+Patch122:	414-gcc-atxmega64b1.patch
+Patch123:	415-gcc-atmega_8a_128a_1284.patch
+Patch124:	416-gcc-atxmega64a4u.patch
+Patch125:	417-gcc-atxmega128d4.patch
+Patch126:	418-gcc-atmxt336s.patch
+Patch127:	419-gcc-atxmega16c4_32c4_128c3_256c3.patch
+Patch128:	420-gcc-atxmega384d3.patch
+Patch129:	421-gcc-atmega48hvf.patch
+Patch130:	422-gcc-atmega26hvg.patch
+Patch131:	423-gcc-atmxt224_224e.patch
+Patch132:	424-gcc-atxmega192c3.patch
+Patch133:	425-gcc-atmxt112sl.patch
+Patch134:	426-gcc-atxmega64c3.patch
+Patch135:	427-gcc-ata6285_6286.patch
+Patch136:	428-gcc-attiny828.patch
+Patch137:	429-gcc-ata5790_5790n_5795.patch
+Patch138:	430-gcc-ata5272_ata5505.patch
+Patch139:	500-gcc-bug13473.patch
+Patch140:	501-gcc-avrtiny10-bug-12510.patch
+Patch141:	502-gcc-bug12915.patch
+Patch142:	503-gcc-bug13789.patch
+Patch143:	504-gcc-conditional-register.patch
+Patch144:	505-gcc-avrtc381-tiny.patch
 License:	GPL
 Group:		Development/Languages
 Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	8e0b5c12212e185f3e4383106bfa9cc6
+# Source0-md5:	028115c4fbfb6cfd75d6369f4a90d87e
 BuildRequires:	/bin/bash
 BuildRequires:	autoconf
 BuildRequires:	bison
@@ -109,6 +113,7 @@ Ten pakiet dodaje obsługę C++ do kompilatora gcc dla AVR.
 %prep
 %setup -q -n gcc-%{version}
 cd gcc/config/%{target} && %undos -f c,h && cd -
+%patch1 -p2
 %patch100 -p0
 %patch101 -p0
 %patch102 -p0
@@ -151,6 +156,9 @@ cd gcc/config/%{target} && %undos -f c,h && cd -
 %patch139 -p0
 %patch140 -p0
 %patch141 -p0
+%patch142 -p0
+%patch143 -p0
+%patch144 -p0
 
 %build
 rm -rf obj-%{target}
@@ -203,6 +211,7 @@ rm -f $RPM_BUILD_ROOT%{_mandir}/man7/gpl.7
 rm -f $RPM_BUILD_ROOT%{_datadir}/locale/*/LC_MESSAGES/{gcc,cpplib}.mo
 rm -rf $RPM_BUILD_ROOT%{gcclib}/include-fixed
 rm -rf $RPM_BUILD_ROOT%{gcclib}/install-tools
+rm -f $RPM_BUILD_ROOT%{gcclib}/liblto_plugin.la
 
 %if 0%{!?debug:1}
 # strip target libraries
@@ -223,6 +232,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{gcclib}/collect2
 %attr(755,root,root) %{gcclib}/lto-wrapper
 %attr(755,root,root) %{gcclib}/lto1
+%attr(755,root,root) %{gcclib}/liblto_plugin.so*
 %{gcclib}/libg*.a
 %{gcclib}/%{target}*
 %{gcclib}/plugin

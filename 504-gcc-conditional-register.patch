@@ -1,0 +1,85 @@
+diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
+--- gcc/config/avr/avr.c	2011-10-28 16:28:16.000000000 +0530
++++ gcc/config/avr/avr.c	2011-10-28 16:40:20.000000000 +0530
+@@ -96,6 +96,7 @@ static struct machine_function * avr_ini
+ static void avr_init_builtins (void);
+ static rtx avr_expand_builtin (tree, rtx, rtx, enum machine_mode, int);
+ static rtx avr_builtin_setjmp_frame_value (void);
++static void avr_conditional_register_usage (void);
+ static bool avr_hard_regno_scratch_ok (unsigned int);
+ static unsigned int avr_case_values_threshold (void);
+ static bool avr_frame_pointer_required_p (void);
+@@ -212,6 +213,8 @@ static const struct default_options avr_
+ #undef TARGET_BUILTIN_SETJMP_FRAME_VALUE
+ #define TARGET_BUILTIN_SETJMP_FRAME_VALUE avr_builtin_setjmp_frame_value
+ 
++#undef TARGET_CONDITIONAL_REGISTER_USAGE
++#define TARGET_CONDITIONAL_REGISTER_USAGE avr_conditional_register_usage
+ #undef TARGET_HARD_REGNO_SCRATCH_OK
+ #define TARGET_HARD_REGNO_SCRATCH_OK avr_hard_regno_scratch_ok
+ #undef TARGET_CASE_VALUES_THRESHOLD
+@@ -7388,6 +7391,19 @@ avr_output_addr_vec_elt (FILE *stream, i
+     fprintf (stream, "\trjmp .L%d\n", value);
+ }
+ 
++static void
++avr_conditional_register_usage(void) {
++   if (AVR_TINY) {                             
++     int i;                                    
++     for (i = 0;  i <= 17;  i++) {             
++       fixed_regs[i] = 1;                      
++       call_used_regs[i] = 1;                  
++     }                                         
++	CLEAR_HARD_REG_SET(reg_class_contents[(int)ADDW_REGS]);           
++	CLEAR_HARD_REG_SET(reg_class_contents[(int)NO_LD_REGS]);           
++   }
++}
++
+ /* Returns true if SCRATCH are safe to be allocated as a scratch
+    registers (for a define_peephole2) in the current function.  */
+ 
+diff -Naurp gcc/config/avr/avr.h gcc/config/avr/avr.h
+--- gcc/config/avr/avr.h	2011-10-28 16:29:55.000000000 +0530
++++ gcc/config/avr/avr.h	2011-10-28 16:40:20.000000000 +0530
+@@ -313,41 +313,6 @@ enum reg_class {
+   {0xffffffff,0x00000003}	/* ALL_REGS */				\
+ }
+ 
+-/* Zero or more C statements that may conditionally modify five variables
+-   fixed_regs, call_used_regs, global_regs, reg_names, and reg_class_contents,
+-   to take into account any dependence of these register sets on target flags.
+-   The first three of these are of type char [] (interpreted as Boolean
+-   vectors). global_regs is a const char *[], and reg_class_contents is a
+-   HARD_REG_SET. Before the macro is called, fixed_regs, call_used_regs,
+-   reg_class_contents, and reg_names have been initialized from
+-   FIXED_REGISTERS, CALL_USED_REGISTERS, REG_CLASS_CONTENTS, and
+-   REGISTER_NAMES, respectively. global_regs has been cleared, and any
+-   ‘-ffixed-reg’, ‘-fcall-used-reg’ and ‘-fcall-saved-reg’ command options
+-   have been applied.
+-
+-   You need not define this macro if it has no work to do.
+-
+-   If the usage of an entire class of registers depends on the target flags,
+-   you may indicate this to GCC by using this macro to modify fixed_regs and
+-   call_used_regs to 1 for each of the registers in the classes which should
+-   not be used by GCC. Also define the macro REG_CLASS_FROM_LETTER /
+-   REG_CLASS_FROM_CONSTRAINT to return NO_REGS if it is called with a letter
+-   for a class that shouldn’t be used.  (However, if this class is not included
+-   in GENERAL_REGS and all of the insn patterns whose constraints permit this
+-   class are controlled by target switches, then GCC will automatically avoid
+-   using these registers when the target switches are opposed to them.) */
+-
+-#define CONDITIONAL_REGISTER_USAGE             \
+-   if (AVR_TINY) {                             \
+-     int i;                                    \
+-     for (i = 0;  i <= 17;  i++) {             \
+-       fixed_regs[i] = 1;                      \
+-       call_used_regs[i] = 1;                  \
+-     }                                         \
+-	CLEAR_HARD_REG_SET(reg_class_contents[(int)ADDW_REGS]);           \
+-	CLEAR_HARD_REG_SET(reg_class_contents[(int)NO_LD_REGS]);           \
+-   }
+-
+ #define REGNO_REG_CLASS(R) avr_regno_reg_class(R)
+ 
+ /* The following macro defines cover classes for Integrated Register

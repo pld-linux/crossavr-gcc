@@ -1,0 +1,33 @@
+diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
+--- gcc/config/avr/avr-devices.c	2011-10-28 11:14:59.000000000 +0530
++++ gcc/config/avr/avr-devices.c	2011-10-28 11:44:14.000000000 +0530
+@@ -275,7 +275,7 @@ const struct mcu_type_s avr_mcu_types[] 
+   { "avrxmega5",    ARCH_AVRXMEGA5, NULL,                           0, 0x2000, "x64a1" },
+   { "atxmega64a1",  ARCH_AVRXMEGA5, "__AVR_ATxmega64A1__",          0, 0x2000, "x64a1" },
+   { "atxmega64a1u",  ARCH_AVRXMEGA5, "__AVR_ATxmega64A1U__",        0, 0x2000, "x64a1u" },
+-    /* Xmega, > 128K, <= 256K FLASH, <= 64K RAM.  */
++    /* Xmega, >= 128K FLASH, <= 64K RAM.  */
+   { "avrxmega6",    ARCH_AVRXMEGA6, NULL,                           0, 0x2000, "x128a3" },
+   { "atxmega128a3", ARCH_AVRXMEGA6, "__AVR_ATxmega128A3__",         0, 0x2000, "x128a3" },
+   { "atxmega128a3u",ARCH_AVRXMEGA6, "__AVR_ATxmega128A3U__",        0, 0x2000, "x128a3u"},
+@@ -289,7 +289,8 @@ const struct mcu_type_s avr_mcu_types[] 
+   { "atxmega256a3b",ARCH_AVRXMEGA6, "__AVR_ATxmega256A3B__",        0, 0x2000, "x256a3b" },
+   { "atxmega256a3bu", ARCH_AVRXMEGA6, "__AVR_ATxmega256A3BU__",     0, 0x2000, "x256a3bu" },
+   { "atxmega256d3", ARCH_AVRXMEGA6, "__AVR_ATxmega256D3__",         0, 0x2000, "x256d3" },
+-    /* Xmega, >= 128K, <= 256K FLASH, > 64K RAM.  */
++  { "atxmega384c3", ARCH_AVRXMEGA6, "__AVR_ATxmega384C3__",         0, 0x2000, "x384c3" },
++    /* Xmega, >= 128K FLASH, > 64K RAM.  */
+   { "avrxmega7",    ARCH_AVRXMEGA7, NULL,                           0, 0x2000, "x128a1" },
+   { "atxmega128a1", ARCH_AVRXMEGA7, "__AVR_ATxmega128A1__",         0, 0x2000, "x128a1" },
+   { "atxmega128a1u", ARCH_AVRXMEGA7, "__AVR_ATxmega128A1U__",       0, 0x2000, "x128a1u" },
+diff -Naurp gcc/config/avr/t-avr gcc/config/avr/t-avr
+--- gcc/config/avr/t-avr	2011-10-28 11:14:59.000000000 +0530
++++ gcc/config/avr/t-avr	2011-10-28 11:40:24.000000000 +0530
+@@ -295,6 +295,7 @@ MULTILIB_MATCHES = \
+ 	mmcu?avrxmega6=mmcu?atxmega256a3b \
+ 	mmcu?avrxmega6=mmcu?atxmega256a3bu \
+ 	mmcu?avrxmega6=mmcu?atxmega256d3 \
++	mmcu?avrxmega6=mmcu?atxmega384c3 \
+ 	mmcu?avrxmega7=mmcu?atxmega128a1 \
+ 	mmcu?avrxmega7=mmcu?atxmega128a1u \
+ 	mmcu?avrtiny10=mmcu?attiny4 \

@@ -1,0 +1,13 @@
+diff -aurp libiberty/Makefile.in libiberty/Makefile.in
+--- libiberty/Makefile.in	2010-11-21 01:07:08.000000000 +0530
++++ libiberty/Makefile.in	2011-06-21 12:26:09.000000000 +0530
+@@ -340,7 +340,8 @@ libiberty.html : $(srcdir)/libiberty.tex
+ @MAINT@	echo stamp > stamp-functions
+ 
+ INSTALL_DEST = @INSTALL_DEST@
+-install: install_to_$(INSTALL_DEST) install-subdir
++#install: install_to_$(INSTALL_DEST) install-subdir
++install:
+ install-strip: install
+ 
+ .PHONY: install install-strip
