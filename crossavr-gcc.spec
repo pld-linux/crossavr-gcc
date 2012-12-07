@@ -1,7 +1,7 @@
 #
-# Conditional build:                                                          
-%bcond_with	bootstrap	# for bootstraping                              
-#                                             
+# Conditional build:
+%bcond_with	bootstrap	# for bootstraping
+#
 Summary:	Cross AVR GNU binary utility development utilities - gcc
 Summary(es.UTF-8):	Utilitarios para desarrollo de binarios de la GNU - AVR gcc
 Summary(fr.UTF-8):	Utilitaires de développement binaire de GNU - AVR gcc
@@ -10,10 +10,9 @@ Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AV
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
 Version:	4.6.2
-Release:	3
+Release:	4
 Epoch:		1
 Patch1:		gcc-bug51969.patch
-Patch2:		format-security.patch
 # Patches 1xx are taken form Atmel official AVR8-GNU toolchain version 3.4.0.663.
 Patch100:	200-gcc-libiberty-Makefile.in.patch
 Patch101:	300-gcc-fixedpoint-3-4-2010.patch
@@ -87,6 +86,10 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define		gcclib		%{_libdir}/gcc/%{target}/%{version}
 %define		_noautostrip	.*%{gcclib}.*/libgc.*\\.a
 
+# functions with printf format attribute but with special parser and also
+# receiving non constant format strings
+%define		Werror_cflags	%{nil}
+
 %description
 This package contains a cross-gcc which allows the creation of
 binaries to be run on Atmel AVR on other machines.
@@ -115,7 +118,6 @@ Ten pakiet dodaje obsługę C++ do kompilatora gcc dla AVR.
 %setup -q -n gcc-%{version}
 cd gcc/config/%{target} && %undos -f c,h && cd -
 %patch1 -p2
-%patch2 -p1
 %patch100 -p0
 %patch101 -p0
 %patch102 -p0
