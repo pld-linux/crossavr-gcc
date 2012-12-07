@@ -10,7 +10,7 @@ Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AV
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
 Version:	4.6.2
-Release:	2
+Release:	3
 Epoch:		1
 Patch1:		gcc-bug51969.patch
 Patch2:		format-security.patch
