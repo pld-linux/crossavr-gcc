@@ -32,3 +32,18 @@
  	      return false;
  	    }
  
+--- gcc-4.6.2/gcc/lto-wrapper.c~	2011-02-01 15:42:08.000000000 +0100
++++ gcc-4.6.2/gcc/lto-wrapper.c	2012-12-07 22:52:38.609628642 +0100
+@@ -181,10 +181,10 @@
+       if (err != 0)
+ 	{
+ 	  errno = err;
+-	  fatal_perror (errmsg);
++	  fatal_perror ("%s", errmsg);
+ 	}
+       else
+-	fatal (errmsg);
++	fatal ("%s", errmsg);
+     }
+ 
+   return pex;
