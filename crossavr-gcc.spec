@@ -13,6 +13,7 @@ Version:	4.6.2
 Release:	2
 Epoch:		1
 Patch1:		gcc-bug51969.patch
+Patch2:		format-security.patch
 # Patches 1xx are taken form Atmel official AVR8-GNU toolchain version 3.4.0.663.
 Patch100:	200-gcc-libiberty-Makefile.in.patch
 Patch101:	300-gcc-fixedpoint-3-4-2010.patch
@@ -114,6 +115,7 @@ Ten pakiet dodaje obsługę C++ do kompilatora gcc dla AVR.
 %setup -q -n gcc-%{version}
 cd gcc/config/%{target} && %undos -f c,h && cd -
 %patch1 -p2
+%patch2 -p1
 %patch100 -p0
 %patch101 -p0
 %patch102 -p0
