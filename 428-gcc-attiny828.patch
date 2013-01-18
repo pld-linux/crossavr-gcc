@@ -1,21 +1,21 @@
 diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
---- gcc/config/avr/avr-devices.c	2012-02-23 15:24:34.000000000 +0530
-+++ gcc/config/avr/avr-devices.c	2012-02-23 15:28:51.000000000 +0530
-@@ -97,6 +97,7 @@ const struct mcu_type_s avr_mcu_types[] 
+--- gcc/config/avr/avr-devices.c	2012-05-31 14:44:29.000000000 +0530
++++ gcc/config/avr/avr-devices.c	2012-05-31 14:44:40.000000000 +0530
+@@ -96,6 +96,7 @@ const struct mcu_type_s avr_mcu_types[] 
+   { "attiny87",             ARCH_AVR25, "__AVR_ATtiny87__",         0, 0x0100, "tn87" },
    { "attiny48",             ARCH_AVR25, "__AVR_ATtiny48__",         0, 0x0100, "tn48" },
    { "attiny88",             ARCH_AVR25, "__AVR_ATtiny88__",         0, 0x0100, "tn88" },
-   { "attiny80",             ARCH_AVR25, "__AVR_ATtiny80__",         0, 0x0100, "tn80" },
 +  { "attiny828",            ARCH_AVR25, "__AVR_ATtiny828__",        0, 0x0100, "tn828" },
    { "at86rf401",            ARCH_AVR25, "__AVR_AT86RF401__",        1, 0x0060, "86401" },
      /* Classic, > 8K, <= 64K +2-byte PC + { JMP/CALL }.  */
    { "avr3",                 ARCH_AVR3, NULL,                        0, 0x0060, "43355" },
 diff -Naurp gcc/config/avr/t-avr gcc/config/avr/t-avr
---- gcc/config/avr/t-avr	2012-02-23 15:24:34.000000000 +0530
-+++ gcc/config/avr/t-avr	2012-02-23 15:29:11.000000000 +0530
-@@ -139,6 +139,7 @@ MULTILIB_MATCHES = \
+--- gcc/config/avr/t-avr	2012-05-31 14:44:29.000000000 +0530
++++ gcc/config/avr/t-avr	2012-05-31 14:44:40.000000000 +0530
+@@ -138,6 +138,7 @@ MULTILIB_MATCHES = \
+ 	mmcu?avr25=mmcu?attiny87 \
  	mmcu?avr25=mmcu?attiny48 \
  	mmcu?avr25=mmcu?attiny88 \
- 	mmcu?avr25=mmcu?attiny80 \
 +	mmcu?avr25=mmcu?attiny828 \
  	mmcu?avr25=mmcu?at86rf401 \
  	mmcu?avr3=mmcu?at43usb355 \

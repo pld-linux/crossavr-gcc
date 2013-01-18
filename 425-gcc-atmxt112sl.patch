@@ -1,7 +1,7 @@
 diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
 --- gcc/config/avr/avr-devices.c	2012-02-10 20:23:45.000000000 +0530
 +++ gcc/config/avr/avr-devices.c	2012-02-10 20:24:34.000000000 +0530
-@@ -267,6 +267,7 @@ const struct mcu_type_s avr_mcu_types[] 
+@@ -266,6 +266,7 @@ const struct mcu_type_s avr_mcu_types[] 
      /* Xmega, <= 8K FLASH.  */
      /* Xmega, > 8K, <= 64K FLASH, <= 64K RAM.  */
    { "avrxmega2",    ARCH_AVRXMEGA2, NULL,                           0, 0x2000, "x32a4" },
@@ -12,7 +12,7 @@ diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
 diff -Naurp gcc/config/avr/t-avr gcc/config/avr/t-avr
 --- gcc/config/avr/t-avr	2012-02-10 20:23:45.000000000 +0530
 +++ gcc/config/avr/t-avr	2012-02-10 20:24:34.000000000 +0530
-@@ -281,6 +281,7 @@ MULTILIB_MATCHES = \
+@@ -280,6 +280,7 @@ MULTILIB_MATCHES = \
  	mmcu?avr6=mmcu?atmega256rfr2 \
   	mmcu?avr6=mmcu?atmega2560 \
  	mmcu?avr6=mmcu?atmega2561 \

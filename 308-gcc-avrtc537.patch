@@ -1,0 +1,31 @@
+diff -Naurp gcc/config/avr/libgcc.S gcc/config/avr/libgcc.S
+--- gcc/config/avr/libgcc.S	2012-05-29 16:32:53.000000000 +0530
++++ gcc/config/avr/libgcc.S	2012-06-04 18:31:55.000000000 +0530
+@@ -782,7 +782,26 @@ __tablejump__:
+ #endif /* defined (L_tablejump) */
+ #endif
+ 
+-#if !defined(__AVR_TINY__)
++#if defined(__AVR_TINY__)
++#ifdef L_copy_data
++        .section .init4,"ax",@progbits
++        .global __do_copy_data
++__do_copy_data:
++        ldi     r18, hi8(__data_end)
++        ldi     r26, lo8(__data_start)
++        ldi     r27, hi8(__data_start)
++        ldi     r30, lo8(__data_load_start + __AVR_TINY_PM_BASE_ADDRESS__)
++        ldi     r31, hi8(__data_load_start + __AVR_TINY_PM_BASE_ADDRESS__)
++        rjmp    .L__do_copy_data_start
++.L__do_copy_data_loop:
++        ld      r19, z+
++        st      X+, r19
++.L__do_copy_data_start:
++        cpi     r26, lo8(__data_end)
++        cpc     r27, r18
++        brne    .L__do_copy_data_loop
++#endif
++#else
+ #ifdef L_copy_data
+ 	.section .init4,"ax",@progbits
+ 	.global __do_copy_data

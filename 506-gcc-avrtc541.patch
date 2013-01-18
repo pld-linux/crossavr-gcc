@@ -1,0 +1,42 @@
+diff -Naurp gcc/config/avr/libgcc.S gcc/config/avr/libgcc.S
+--- gcc/config/avr/libgcc.S	2012-06-12 12:43:40.000000000 +0530
++++ gcc/config/avr/libgcc.S	2012-06-12 12:44:08.000000000 +0530
+@@ -862,6 +862,12 @@ __do_copy_data:
+ 	cpc	r27, r17
+ 	brne	.L__do_copy_data_loop
+ #endif /* !defined(__AVR_HAVE_ELPMX__) && !defined(__AVR_HAVE_ELPM__) */
++
++;Clear RAMPZ in case it was set during copy_data
++#if defined(__AVR_HAVE_ELPMX__ ) || defined(__AVR_HAVE_ELPM__)
++    out __RAMPZ__, __zero_reg__
++#endif
++
+ #endif /* L_copy_data */
+ #endif
+ 
+@@ -941,6 +947,12 @@ __do_global_ctors:
+ 	cpc	r29, r17
+ 	brne	.L__do_global_ctors_loop
+ #endif /* defined(__AVR_HAVE_RAMPZ__) */
++
++;Clear RAMPZ in case it was set
++#if defined(__AVR_HAVE_RAMPZ__)
++    out __RAMPZ__, __zero_reg__
++#endif
++
+ #endif /* L_ctors */
+ 
+ #ifdef L_dtors
+@@ -992,6 +1004,12 @@ __do_global_dtors:
+ 	cpc	r29, r17
+ 	brne	.L__do_global_dtors_loop
+ #endif /* defined(__AVR_HAVE_RAMPZ__) */
++
++;Clear RAMPZ in case it was set
++#if defined(__AVR_HAVE_RAMPZ__)
++    out __RAMPZ__, __zero_reg__
++#endif
++
+ #endif /* L_dtors */
+ 
+ #if !defined (__AVR_TINY__)

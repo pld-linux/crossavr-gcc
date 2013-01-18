@@ -1,6 +1,6 @@
 diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
---- gcc/config/avr/avr.c	2011-10-28 16:28:16.000000000 +0530
-+++ gcc/config/avr/avr.c	2011-10-28 16:40:20.000000000 +0530
+--- gcc/config/avr/avr.c	2012-04-23 11:22:39.000000000 +0530
++++ gcc/config/avr/avr.c	2012-04-23 11:26:15.000000000 +0530
 @@ -96,6 +96,7 @@ static struct machine_function * avr_ini
  static void avr_init_builtins (void);
  static rtx avr_expand_builtin (tree, rtx, rtx, enum machine_mode, int);
@@ -39,9 +39,9 @@ diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
     registers (for a define_peephole2) in the current function.  */
  
 diff -Naurp gcc/config/avr/avr.h gcc/config/avr/avr.h
---- gcc/config/avr/avr.h	2011-10-28 16:29:55.000000000 +0530
-+++ gcc/config/avr/avr.h	2011-10-28 16:40:20.000000000 +0530
-@@ -313,41 +313,6 @@ enum reg_class {
+--- gcc/config/avr/avr.h	2012-04-23 11:25:46.000000000 +0530
++++ gcc/config/avr/avr.h	2012-04-23 11:26:15.000000000 +0530
+@@ -314,41 +314,6 @@ enum reg_class {
    {0xffffffff,0x00000003}	/* ALL_REGS */				\
  }
  
