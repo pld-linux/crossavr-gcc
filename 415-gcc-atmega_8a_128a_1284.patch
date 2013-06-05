@@ -1,7 +1,7 @@
 diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
 --- gcc/config/avr/avr-devices.c	2011-10-28 14:34:49.000000000 +0530
 +++ gcc/config/avr/avr-devices.c	2011-10-28 14:39:27.000000000 +0530
-@@ -118,6 +118,7 @@ const struct mcu_type_s avr_mcu_types[] 
+@@ -117,6 +117,7 @@ const struct mcu_type_s avr_mcu_types[] 
      /* Enhanced, <= 8K + 2-byte PC + { MOVW/LPMX, MUL }.  */
    { "avr4",                 ARCH_AVR4, NULL,                        0, 0x0060, "m8" },
    { "atmega8",              ARCH_AVR4, "__AVR_ATmega8__",           0, 0x0060, "m8" },
@@ -9,7 +9,7 @@ diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
    { "atmega48",             ARCH_AVR4, "__AVR_ATmega48__",          0, 0x0100, "m48" },
    { "atmega48a",            ARCH_AVR4, "__AVR_ATmega48A__",         0, 0x0100, "m48a" },
    { "atmega48pa",           ARCH_AVR4, "__AVR_ATmega48PA__",        0, 0x0100, "m48pa" },
-@@ -242,8 +243,10 @@ const struct mcu_type_s avr_mcu_types[] 
+@@ -241,8 +242,10 @@ const struct mcu_type_s avr_mcu_types[] 
         { MOVW/LPMX, JMP/CALL, MUL, ELPM, ELPMX }.  */
    { "avr51",                ARCH_AVR51, NULL,                       0, 0x0100, "m128" },
    { "atmega128",            ARCH_AVR51, "__AVR_ATmega128__",        0, 0x0100, "m128" },
@@ -23,7 +23,7 @@ diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
 diff -Naurp gcc/config/avr/t-avr gcc/config/avr/t-avr
 --- gcc/config/avr/t-avr	2011-10-28 14:55:08.000000000 +0530
 +++ gcc/config/avr/t-avr	2011-10-28 14:52:10.000000000 +0530
-@@ -157,6 +157,7 @@ MULTILIB_MATCHES = \
+@@ -156,6 +156,7 @@ MULTILIB_MATCHES = \
  	mmcu?avr4=mmcu?atmega48pa \
  	mmcu?avr4=mmcu?atmega48p \
  	mmcu?avr4=mmcu?atmega8 \
@@ -31,7 +31,7 @@ diff -Naurp gcc/config/avr/t-avr gcc/config/avr/t-avr
  	mmcu?avr4=mmcu?atmega8515 \
  	mmcu?avr4=mmcu?atmega8535 \
  	mmcu?avr4=mmcu?atmega88 \
-@@ -263,8 +264,10 @@ MULTILIB_MATCHES = \
+@@ -262,8 +263,10 @@ MULTILIB_MATCHES = \
  	mmcu?avr5=mmcu?at94k \
  	mmcu?avr5=mmcu?m3000 \
  	mmcu?avr51=mmcu?atmega128 \

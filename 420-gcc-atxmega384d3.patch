@@ -1,7 +1,7 @@
 diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
 --- gcc/config/avr/avr-devices.c	2011-11-08 17:37:12.000000000 +0530
 +++ gcc/config/avr/avr-devices.c	2011-11-08 17:38:18.000000000 +0530
-@@ -309,6 +309,7 @@ const struct mcu_type_s avr_mcu_types[] 
+@@ -308,6 +308,7 @@ const struct mcu_type_s avr_mcu_types[] 
    { "atxmega256c3", ARCH_AVRXMEGA6, "__AVR_ATxmega256C3__",         0, 0x2000, "x256c3" },
    { "atxmega256d3", ARCH_AVRXMEGA6, "__AVR_ATxmega256D3__",         0, 0x2000, "x256d3" },
    { "atxmega384c3", ARCH_AVRXMEGA6, "__AVR_ATxmega384C3__",         0, 0x2000, "x384c3" },
@@ -12,7 +12,7 @@ diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
 diff -Naurp gcc/config/avr/t-avr gcc/config/avr/t-avr
 --- gcc/config/avr/t-avr	2011-11-08 17:37:12.000000000 +0530
 +++ gcc/config/avr/t-avr	2011-11-08 17:38:18.000000000 +0530
-@@ -315,6 +315,7 @@ MULTILIB_MATCHES = \
+@@ -314,6 +314,7 @@ MULTILIB_MATCHES = \
  	mmcu?avrxmega6=mmcu?atxmega256c3 \
  	mmcu?avrxmega6=mmcu?atxmega256d3 \
  	mmcu?avrxmega6=mmcu?atxmega384c3 \

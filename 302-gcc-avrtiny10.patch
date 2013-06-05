@@ -217,7 +217,7 @@ diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
 +						AS2 (ld,__tmp_reg__,Y+)     CR_TAB
 +		                AS2 (ld,%B0,Y)         CR_TAB
 +						AS2 (subi,%A2,lo8(%o1+1)) CR_TAB
-+						AS2 (subi,%B2,hi8(%o1+1)) CR_TAB
++						AS2 (sbci,%B2,hi8(%o1+1)) CR_TAB
 +						AS2 (mov,%A0,__tmp_reg__))
 +				         :  (AS2 (ldd,__tmp_reg__,%A1) CR_TAB
 +		                AS2 (ldd,%B0,%B1)         CR_TAB
@@ -228,7 +228,7 @@ diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
 +						AS2 (ld,__tmp_reg__,Z+)     CR_TAB
 +		                AS2 (ld,%B0,Z)         CR_TAB
 +						AS2 (subi,%A2,lo8(%o1+1)) CR_TAB
-+						AS2 (subi,%B2,hi8(%o1+1)) CR_TAB
++						AS2 (sbci,%B2,hi8(%o1+1)) CR_TAB
 +						AS2 (mov,%A0,__tmp_reg__))
 +				         :  (AS2 (ldd,__tmp_reg__,%A1) CR_TAB
  		  AS2 (ldd,%B0,%B1)         CR_TAB
@@ -246,7 +246,7 @@ diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
 +						AS2 (ld,%A0,Y+)             CR_TAB
 +		                AS2 (ld,%B0,Y)               CR_TAB
 +						AS2 (subi,%A2,lo8(%o1+1)) CR_TAB
-+						AS2 (subi,%B2,hi8(%o1+1)))
++						AS2 (sbci,%B2,hi8(%o1+1)))
 +				         :  (AS2 (ldd,%A0,%A1) CR_TAB
 +		                AS2 (ldd,%B0,%B1));
 +	  if(REGNO(op[2]) == REG_Z)
@@ -255,7 +255,7 @@ diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
 +						AS2 (ld,%A0,Z+)             CR_TAB
 +		                AS2 (ld,%B0,Z)              CR_TAB
 +						AS2 (subi,%A2,lo8(%o1+1)) CR_TAB
-+						AS2 (subi,%B2,hi8(%o1+1)))
++						AS2 (sbci,%B2,hi8(%o1+1)))
 +				         :  (AS2 (ldd,%A0,%A1) CR_TAB
  	      AS2 (ldd,%B0,%B1));
 +      
@@ -571,7 +571,7 @@ diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
 +
 +		if(REGNO(op[2]) == REG_Y)
 +        return *l=5, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o1)))   CR_TAB
-+						AS2 (subi,%B2,hi8(-(%o1)))   CR_TAB
++						AS2 (sbci,%B2,hi8(-(%o1)))   CR_TAB
 +		                AS2 (ld,%A0,Y+)               CR_TAB
 +		                AS2 (ld,%B0,Y+)               CR_TAB
 +		                AS2 (ld,__tmp_reg__,Y+)       CR_TAB
@@ -587,7 +587,7 @@ diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
 -      return *l=4, (AS2 (ldd,%A0,%A1) CR_TAB
 +		if(REGNO(op[2]) == REG_Z)
 +        return *l=5, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o1)))   CR_TAB
-+						AS2 (subi,%B2,hi8(-(%o1)))   CR_TAB
++						AS2 (sbci,%B2,hi8(-(%o1)))   CR_TAB
 +		                AS2 (ld,%A0,Z+)              CR_TAB
 +		                AS2 (ld,%B0,Z+)              CR_TAB
 +		                AS2 (ld,__tmp_reg__,Z+)      CR_TAB
@@ -604,7 +604,7 @@ diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
 +			op[2] = XEXP(base, 0);
 +		if(REGNO(op[2]) == REG_Y)
 +        return *l=4, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o1)))   CR_TAB
-+						AS2 (subi,%B2,hi8(-(%o1)))   CR_TAB
++						AS2 (sbci,%B2,hi8(-(%o1)))   CR_TAB
 +		                AS2 (ld,%A0,Y+)               CR_TAB
 +		                AS2 (ld,%B0,Y+)               CR_TAB
 +		                AS2 (ld,%C0,Y+)               CR_TAB
@@ -617,7 +617,7 @@ diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
 +                        AS2 (ldd,%D0,%D1));
 +		if(REGNO(op[2]) == REG_Z)
 +        return *l=4, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o1)))   CR_TAB
-+						AS2 (subi,%B2,hi8(-(%o1)))   CR_TAB
++						AS2 (sbci,%B2,hi8(-(%o1)))   CR_TAB
 +		                AS2 (ld,%A0,Z+)               CR_TAB
 +		                AS2 (ld,%B0,Z+)               CR_TAB
 +		                AS2 (ld,%C0,Z+)               CR_TAB
@@ -1203,8 +1203,8 @@ diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
 +			             : (AS2 (std,%B0,%B1)    CR_TAB
                      AS2 (std,%A0,%A1));
 +		if(REGNO(op[2]) == REG_Z)
-+        return *l=2, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o0+1)))    CR_TAB
-+						AS2 (sbci,%B2,hi8(-(%o0+1)))    CR_TAB
++        return *l=2, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o0+2)))    CR_TAB
++						AS2 (sbci,%B2,hi8(-(%o0+2)))    CR_TAB
 +						AS2 (st,-Z,%B1)                  CR_TAB
 +                        AS2 (st,-Z,%A1)                  CR_TAB
 +                        AS2 (subi,%A2,lo8(%o0))    CR_TAB

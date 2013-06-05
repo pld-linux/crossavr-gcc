@@ -1,0 +1,130 @@
+diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
+--- gcc/config/avr/avr.c	2012-07-13 16:06:56.000000000 +0530
++++ gcc/config/avr/avr.c	2012-07-13 15:23:01.000000000 +0530
+@@ -2265,6 +2265,15 @@ out_movqi_r_mr (rtx insn, rtx op[], int 
+           {
+             if (AVR_TINY)
+             {
++                if (reg_overlap_mentioned_p (dest, XEXP (x,0))
++                    || reg_unused_after (insn, XEXP (x,0)))
++                {
++
++                    *l = 3;
++                    return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
++                            AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
++                            AS2 (ld,%0,Y));
++                }
+               *l = 5;
+               return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
+                       AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
+@@ -2282,6 +2291,15 @@ out_movqi_r_mr (rtx insn, rtx op[], int 
+           {
+             if (AVR_TINY)
+             {
++              if (reg_overlap_mentioned_p (dest, XEXP (x,0))
++                  || reg_unused_after (insn, XEXP (x,0)))
++                  {
++
++                    *l = 3;
++                    return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
++                            AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
++                            AS2 (ld,%0,Z));
++                  }
+               *l = 5;
+               return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
+                       AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
+@@ -3766,12 +3784,41 @@ out_movqi_mr_r (rtx insn, rtx op[], int 
+         op[2] = XEXP(x, 0);
+         if(REGNO(op[2]) == REG_Y) {
+           if (AVR_TINY) {
+-            *l = 5;
+-            return (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
+-		    AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
+-		    AS2 (st,Y,%1)              CR_TAB
+-                    AS2 (subi,%A2,lo8(%o0)) CR_TAB
+-		    AS2 (sbci,%B2,hi8(%o0)));
++            if (reg_overlap_mentioned_p (src, XEXP (x, 0)))
++            {
++              if (reg_unused_after (insn, XEXP (x, 0)))
++              {
++                *l = 4;
++                return (AS2 (mov,__tmp_reg__,%1)         CR_TAB
++			            AS2 (subi,%A2,lo8(-(%o0)))       CR_TAB
++			            AS2 (sbci,%B2,hi8(-(%o0)))       CR_TAB
++			            AS2 (st,Y,__tmp_reg__));
++              }
++              *l = 6;
++              return (AS2 (mov,__tmp_reg__,%1)         CR_TAB
++			          AS2 (subi,%A2,lo8(-(%o0)))       CR_TAB
++			          AS2 (sbci,%B2,hi8(-(%o0)))       CR_TAB
++			          AS2 (st,Y,__tmp_reg__)          CR_TAB
++                      AS2 (subi,%A2,lo8(%o0))          CR_TAB
++		              AS2 (sbci,%B2,hi8(%o0)));        
++            }
++            else
++            {
++              if (reg_unused_after (insn, XEXP (x, 0)))
++              {
++                *l = 3;
++                return (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
++		                AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
++		                AS2 (st,Y,%1));
++              }
++
++              *l = 5;
++              return (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
++                      AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
++                      AS2 (st,Y,%1)              CR_TAB
++                      AS2 (subi,%A2,lo8(%o0)) CR_TAB
++                      AS2 (sbci,%B2,hi8(%o0)));
++            }
+           } else {
+             *l = 1;
+             return (AS2 (std,%0,%1));
+@@ -3779,12 +3826,40 @@ out_movqi_mr_r (rtx insn, rtx op[], int 
+         }
+         if(REGNO(op[2]) == REG_Z) {
+           if (AVR_TINY) {
+-            *l = 5;
+-            return (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
+-    	            AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
+-                    AS2 (st,Z,%1)              CR_TAB
+-                    AS2 (subi,%A2,lo8(%o0)) CR_TAB
+-                    AS2 (sbci,%B2,hi8(%o0)));
++            if (reg_overlap_mentioned_p (src, XEXP (x, 0)))
++            {
++              if (reg_unused_after (insn, XEXP (x, 0)))
++              {
++                *l = 4;
++                return (AS2 (mov,__tmp_reg__,%1)         CR_TAB
++			            AS2 (subi,%A2,lo8(-(%o0)))       CR_TAB
++			            AS2 (sbci,%B2,hi8(-(%o0)))       CR_TAB
++			            AS2 (st,Z,__tmp_reg__));
++              }
++              *l = 6;
++              return (AS2 (mov,__tmp_reg__,%1)         CR_TAB
++			          AS2 (subi,%A2,lo8(-(%o0)))       CR_TAB
++			          AS2 (sbci,%B2,hi8(-(%o0)))       CR_TAB
++			          AS2 (st,Z,__tmp_reg__)          CR_TAB
++                      AS2 (subi,%A2,lo8(%o0))          CR_TAB
++		              AS2 (sbci,%B2,hi8(%o0)));        
++            }
++            else
++            {
++              if (reg_unused_after (insn, XEXP (x, 0)))
++              {
++                *l = 3;
++                return (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
++		                AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
++		                AS2 (st,Z,%1));
++              }
++              *l = 5;
++              return (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
++                      AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
++                      AS2 (st,Z,%1)              CR_TAB
++                      AS2 (subi,%A2,lo8(%o0)) CR_TAB
++                      AS2 (sbci,%B2,hi8(%o0)));
++            }
+           } else {
+ 	    *l = 1;
+             return (AS2 (std,%0,%1));

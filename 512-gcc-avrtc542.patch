@@ -1,0 +1,2753 @@
+diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
+--- gcc/config/avr/avr.c	2012-07-05 14:23:46.000000000 +0530
++++ gcc/config/avr/avr.c	2012-07-06 17:30:38.000000000 +0530
+@@ -2191,19 +2191,28 @@ out_movqi_r_mr (rtx insn, rtx op[], int 
+ 	    fatal_insn ("incorrect insn:",insn);
+ 
+ 	  if (disp <= 63 + MAX_LD_OFFSET (GET_MODE (src)))
+-	    return *l = 3, AVR_TINY ? (AS2 (subi,r28,lo8(-(%o1-63))) CR_TAB 
+-				          AS2 (sbci,r29,hi8(-(%o1-63))) CR_TAB
+-						  AS2 (subi,r28,lo8(-63))       CR_TAB 
+-				          AS2 (sbci,r29,hi8(-63))       CR_TAB
+-			              AS2 (ld,%0,Y)                 CR_TAB
+-						  AS2 (subi,r28,lo8(63))       CR_TAB 
+-				          AS2 (sbci,r29,hi8(63))       CR_TAB
+-						  AS2 (subi,r28,lo8(%o1-63)) CR_TAB 
+-				          AS2 (sbci,r29,hi8(%o1-63)))  
+-		                   : (AS2 (adiw,r28,%o1-63) CR_TAB
+-			    AS2 (ldd,%0,Y+63)     CR_TAB
+-			    AS2 (sbiw,r28,%o1-63));
+-
++	  {
++            if (AVR_TINY)
++            {
++              *l = 9;
++              return (AS2 (subi,r28,lo8(-(%o1-63))) CR_TAB
++                      AS2 (sbci,r29,hi8(-(%o1-63))) CR_TAB
++                      AS2 (subi,r28,lo8(-63))       CR_TAB
++                      AS2 (sbci,r29,hi8(-63))       CR_TAB
++                      AS2 (ld,%0,Y)                 CR_TAB
++                      AS2 (subi,r28,lo8(63))        CR_TAB
++                      AS2 (sbci,r29,hi8(63))        CR_TAB
++                      AS2 (subi,r28,lo8(%o1-63))    CR_TAB
++                      AS2 (sbci,r29,hi8(%o1-63)));
++            }
++            else
++            {
++              *l = 3;
++              return (AS2 (adiw,r28,%o1-63) CR_TAB
++                      AS2 (ldd,%0,Y+63)     CR_TAB
++                      AS2 (sbiw,r28,%o1-63));
++            }
++	  }
+ 
+ 	  return *l = 5, (AS2 (subi,r28,lo8(-%o1)) CR_TAB
+ 			  AS2 (sbci,r29,hi8(-%o1)) CR_TAB
+@@ -2217,38 +2226,75 @@ out_movqi_r_mr (rtx insn, rtx op[], int 
+ 	     it but I have this situation with extremal optimizing options.  */
+ 	  if (reg_overlap_mentioned_p (dest, XEXP (x,0))
+ 	      || reg_unused_after (insn, XEXP (x,0)))
+-	    return *l = 2, AVR_TINY ? (AS2 (subi,r26,lo8(-(%o1))) CR_TAB
+-						  AS2 (sbci,r27,hi8(-(%o1))) CR_TAB
+-						  AS2 (ld,%0,X))
+-						   : (AS2 (adiw,r26,%o1) CR_TAB
+-			    AS2 (ld,%0,X));
+-
+-	    return *l = 3, AVR_TINY ? (AS2 (subi,r26,lo8(-(%o1))) CR_TAB
+-						  AS2 (sbci,r27,hi8(-(%o1))) CR_TAB
+-						  AS2 (ld,%0,X) CR_TAB
+-						  AS2 (subi,r26,lo8(%o1)) CR_TAB 
+-				          AS2 (sbci,r27,hi8(%o1))) 
+-						   : (AS2 (adiw,r26,%o1) CR_TAB
+-			  AS2 (ld,%0,X)      CR_TAB
+-			  AS2 (sbiw,r26,%o1));
++          {
++            if (AVR_TINY)
++            {
++              *l = 3;
++              return (AS2 (subi,r26,lo8(-(%o1))) CR_TAB
++                      AS2 (sbci,r27,hi8(-(%o1))) CR_TAB
++                      AS2 (ld,%0,X));
++            }
++            else
++            {
++              *l = 2;
++              return (AS2 (adiw,r26,%o1) CR_TAB
++                      AS2 (ld,%0,X));
++            }
++          }
++
++          if (AVR_TINY)
++          {
++            *l = 5;
++            return (AS2 (subi,r26,lo8(-(%o1))) CR_TAB
++                    AS2 (sbci,r27,hi8(-(%o1))) CR_TAB
++                    AS2 (ld,%0,X) CR_TAB
++                    AS2 (subi,r26,lo8(%o1)) CR_TAB 
++                    AS2 (sbci,r27,hi8(%o1)));
++          }
++          else
++          {
++            *l = 3;
++            return (AS2 (adiw,r26,%o1) CR_TAB
++                    AS2 (ld,%0,X)      CR_TAB
++                    AS2 (sbiw,r26,%o1));
++          }
+ 	}
+ 
+-      *l = 1;
+ 	  op[2] = XEXP(x, 0);
+ 	  if(REGNO(op[2]) == REG_Y)
+-			  return AVR_TINY ? ( AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
+-						AS2 (ld,%0,Y)              CR_TAB
+-			            AS2 (subi,%A2,lo8(%o1)) CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1)))
+-						 :   AS2 (ldd,%0,%1);
++          {
++            if (AVR_TINY)
++            {
++              *l = 5;
++              return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
++                      AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
++                      AS2 (ld,%0,Y)              CR_TAB
++                      AS2 (subi,%A2,lo8(%o1)) CR_TAB
++                      AS2 (sbci,%B2,hi8(%o1)));
++            }
++            else
++            {
++              *l = 1;
++              return (AS2 (ldd,%0,%1));
++            }
++          }
+ 	  if(REGNO(op[2]) == REG_Z)
+-			  return AVR_TINY ? ( AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
+-						AS2 (ld,%0,Z)              CR_TAB
+-			            AS2 (subi,%A2,lo8(%o1)) CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1)))
+-						 :   AS2 (ldd,%0,%1);
++          {
++            if (AVR_TINY)
++            {
++              *l = 5;
++              return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
++                      AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
++                      AS2 (ld,%0,Z)              CR_TAB
++                      AS2 (subi,%A2,lo8(%o1)) CR_TAB
++                      AS2 (sbci,%B2,hi8(%o1)));
++            }
++            else
++            {
++              *l = 1;
++              return (AS2 (ldd,%0,%1));
++            }
++          }
+     }
+   *l = 1;
+   return AS2 (ld,%0,%1);
+@@ -2287,36 +2333,57 @@ out_movhi_r_mr (rtx insn, rtx op[], int 
+ 	      return (AS2 (ld,%A0,X+) CR_TAB
+ 		      AS2 (ld,%B0,X));
+ 	    }
+-	  *l  = 3;
+-	  return AVR_TINY ? (AS2 (ld,%A0,X+) CR_TAB
+-				AS2 (ld,%B0,X)  CR_TAB
+-				AS2 (subi,r26,lo8(1))          CR_TAB
+-				AS2 (sbci,r27,hi8(1))) 
+-		         : (AS2 (ld,%A0,X+) CR_TAB
+-		  AS2 (ld,%B0,X) CR_TAB
+-		  AS2 (sbiw,r26,1));
++
++          if (AVR_TINY)
++          {
++            *l = 4;
++            return (AS2 (ld,%A0,X+)       CR_TAB
++                    AS2 (ld,%B0,X)        CR_TAB
++                    AS2 (subi,r26,lo8(1)) CR_TAB
++                    AS2 (sbci,r27,hi8(1)));
++          }
++          else
++          {
++            *l = 3;
++            return (AS2 (ld,%A0,X+) CR_TAB
++                    AS2 (ld,%B0,X)  CR_TAB
++                    AS2 (sbiw,r26,1));
++          }
+         }
+       else                      /* (R)  */
+ 	{
+-	  *l = 2;
+ 	  if(reg_base == REG_Y)
+-	  return AVR_TINY ? (AS2 (ld,%A0,%1) CR_TAB
+-				AS2 (subi,r28,lo8((-1))) CR_TAB
+-				AS2 (sbci,r29,hi8((-1))) CR_TAB 
+-		        AS2 (ld,%B0,%1) CR_TAB
+-				AS2 (subi,r28,lo8(1)) CR_TAB
+-				AS2 (sbci,r29,hi8(1)))		   
+-		         : (AS2 (ld,%A0,%1) CR_TAB
+-				AS2 (ldd,%B0,%1+1));
++          {
++            if (AVR_TINY) {
++              *l = 6;
++              return (AS2 (ld,%A0,%1) CR_TAB
++                      AS2 (subi,r28,lo8((-1))) CR_TAB
++                      AS2 (sbci,r29,hi8((-1))) CR_TAB 
++                      AS2 (ld,%B0,%1) CR_TAB
++                      AS2 (subi,r28,lo8(1)) CR_TAB
++                      AS2 (sbci,r29,hi8(1)));
++            } else {
++              *l = 2;
++              return (AS2 (ld,%A0,%1) CR_TAB
++                      AS2 (ldd,%B0,%1+1));
++            }
++          }
+ 	  if(reg_base == REG_Z)
+-	  return AVR_TINY ? (AS2 (ld,%A0,%1) CR_TAB
+-				AS2 (subi,r30,lo8((-1))) CR_TAB
+-				AS2 (sbci,r31,hi8((-1))) CR_TAB 
+-		        AS2 (ld,%B0,%1) CR_TAB
+-				AS2 (subi,r30,lo8(1)) CR_TAB
+-				AS2 (sbci,r31,hi8(1)))
+-		         : (AS2 (ld,%A0,%1) CR_TAB
+-		  AS2 (ldd,%B0,%1+1));
++          {
++            if (AVR_TINY) {
++              *l = 6;
++              return (AS2 (ld,%A0,%1) CR_TAB
++                      AS2 (subi,r30,lo8((-1))) CR_TAB
++                      AS2 (sbci,r31,hi8((-1))) CR_TAB 
++                      AS2 (ld,%B0,%1) CR_TAB
++                      AS2 (subi,r30,lo8(1)) CR_TAB
++                      AS2 (sbci,r31,hi8(1)));
++            } else {
++              *l = 2;
++              return (AS2 (ld,%A0,%1) CR_TAB
++                      AS2 (ldd,%B0,%1+1));
++            }
++          }
+ 	}
+     }
+   else if (GET_CODE (base) == PLUS) /* (R + i) */
+@@ -2330,35 +2397,47 @@ out_movhi_r_mr (rtx insn, rtx op[], int 
+ 	    fatal_insn ("incorrect insn:",insn);
+ 	  
+ 	  if (disp <= 63 + MAX_LD_OFFSET (GET_MODE (src)))
+-	    return *l = 4, AVR_TINY ? (AS2 (subi,r28,lo8(-(%o1-62))) CR_TAB 
+-				          AS2 (sbci,r29,hi8(-(%o1-62))) CR_TAB
+-						  AS2 (subi,r28,lo8(-62))       CR_TAB 
+-				          AS2 (sbci,r29,hi8(-62))       CR_TAB
+-			              AS2 (ld,%A0,Y+)                CR_TAB
+-			              AS2 (ld,%B0,Y)                CR_TAB
+-						  AS2 (subi,r28,lo8(63))       CR_TAB 
+-				          AS2 (sbci,r29,hi8(63))       CR_TAB
+-						  AS2 (subi,r28,lo8(%o1-62)) CR_TAB 
+-				          AS2 (sbci,r29,hi8(%o1-62)))  
+-			               : (AS2 (adiw,r28,%o1-62) CR_TAB
+-			    AS2 (ldd,%A0,Y+62)    CR_TAB
+-			    AS2 (ldd,%B0,Y+63)    CR_TAB
+-			    AS2 (sbiw,r28,%o1-62));
+-
+-	  return *l = 6, AVR_TINY ? (AS2 (subi,r28,lo8(-%o1)) CR_TAB
+-						AS2 (sbci,r29,hi8(-%o1)) CR_TAB
+-						AS2 (ld,%A0,Y+)          CR_TAB
+-						AS2 (ld,%B0,Y)           CR_TAB
+-						AS2 (subi,r28,lo8(1))   CR_TAB
+-						AS2 (sbci,r29,hi8(1))   CR_TAB
+-			     		AS2 (subi,r28,lo8(%o1))  CR_TAB
+-						AS2 (sbci,r29,hi8(%o1)))
+-						 : (AS2 (subi,r28,lo8(-%o1)) CR_TAB
+-			  AS2 (sbci,r29,hi8(-%o1)) CR_TAB
+-			  AS2 (ld,%A0,Y)           CR_TAB
+-			  AS2 (ldd,%B0,Y+1)        CR_TAB
+-			  AS2 (subi,r28,lo8(%o1))  CR_TAB
+-			  AS2 (sbci,r29,hi8(%o1)));
++          {
++            if (AVR_TINY) {
++              *l = 10;
++              return (AS2 (subi,r28,lo8(-(%o1-62))) CR_TAB 
++                      AS2 (sbci,r29,hi8(-(%o1-62))) CR_TAB
++                      AS2 (subi,r28,lo8(-62))       CR_TAB 
++                      AS2 (sbci,r29,hi8(-62))       CR_TAB
++                      AS2 (ld,%A0,Y+)               CR_TAB
++                      AS2 (ld,%B0,Y)                CR_TAB
++                      AS2 (subi,r28,lo8(63))        CR_TAB 
++                      AS2 (sbci,r29,hi8(63))        CR_TAB
++                      AS2 (subi,r28,lo8(%o1-62))    CR_TAB 
++                      AS2 (sbci,r29,hi8(%o1-62)));
++            } else {
++              *l = 4;
++              return (AS2 (adiw,r28,%o1-62) CR_TAB
++                      AS2 (ldd,%A0,Y+62)    CR_TAB
++                      AS2 (ldd,%B0,Y+63)    CR_TAB
++                      AS2 (sbiw,r28,%o1-62));
++            }
++          }
++
++	  if (AVR_TINY) {
++            *l = 8;
++            return (AS2 (subi,r28,lo8(-%o1)) CR_TAB
++                    AS2 (sbci,r29,hi8(-%o1)) CR_TAB
++                    AS2 (ld,%A0,Y+)          CR_TAB
++                    AS2 (ld,%B0,Y)           CR_TAB
++                    AS2 (subi,r28,lo8(1))    CR_TAB
++                    AS2 (sbci,r29,hi8(1))    CR_TAB
++                    AS2 (subi,r28,lo8(%o1))  CR_TAB
++                    AS2 (sbci,r29,hi8(%o1)));
++          } else {
++            *l = 6;
++            return (AS2 (subi,r28,lo8(-%o1)) CR_TAB
++                    AS2 (sbci,r29,hi8(-%o1)) CR_TAB
++                    AS2 (ld,%A0,Y)           CR_TAB
++                    AS2 (ldd,%B0,Y+1)        CR_TAB
++                    AS2 (subi,r28,lo8(%o1))  CR_TAB
++                    AS2 (sbci,r29,hi8(%o1)));
++          }
+ 	}
+       if (reg_base == REG_X)
+ 	{
+@@ -2366,80 +2445,114 @@ out_movhi_r_mr (rtx insn, rtx op[], int 
+ 	     it but I have this situation with extremal
+ 	     optimization options.  */
+ 	  
+-	  *l = 4;
+-	  if (reg_base == reg_dest)
+-	    return AVR_TINY ? (AS2 (subi,r26,lo8(-%o1))      CR_TAB
+-				  AS2 (sbci,r27,hi8(-%o1))      CR_TAB
+-		          AS2 (ld,__tmp_reg__,X+)       CR_TAB
+-		          AS2 (ld,%B0,X)                CR_TAB
+-		          AS2 (mov,%A0,__tmp_reg__))
+-			       : (AS2 (adiw,r26,%o1)      CR_TAB
+-		    AS2 (ld,__tmp_reg__,X+) CR_TAB
+-		    AS2 (ld,%B0,X)          CR_TAB
+-		    AS2 (mov,%A0,__tmp_reg__));
+-
+-	    return AVR_TINY ? (AS2 (subi,r26,lo8(-%o1))      CR_TAB
+-	   	          AS2 (sbci,r27,hi8(-%o1))      CR_TAB
+-		          AS2 (ld,%A0,X+)			     CR_TAB
+-		          AS2 (ld,%B0,X)                CR_TAB
+-				  AS2 (subi,r26,lo8(%o1+1))     CR_TAB 
+-				  AS2 (sbci,r27,hi8(%o1+1)))  
+-		           : (AS2 (adiw,r26,%o1) CR_TAB
+-		  AS2 (ld,%A0,X+)    CR_TAB
+-		  AS2 (ld,%B0,X)     CR_TAB
+-		  AS2 (sbiw,r26,%o1+1));
++	  if (reg_base == reg_dest) {
++            if (AVR_TINY) {
++              *l = 5;
++              return (AS2 (subi,r26,lo8(-%o1))      CR_TAB
++                      AS2 (sbci,r27,hi8(-%o1))      CR_TAB
++                      AS2 (ld,__tmp_reg__,X+)       CR_TAB
++                      AS2 (ld,%B0,X)                CR_TAB
++                      AS2 (mov,%A0,__tmp_reg__));
++            } else {
++              *l = 4;
++              return (AS2 (adiw,r26,%o1)      CR_TAB
++                      AS2 (ld,__tmp_reg__,X+) CR_TAB
++                      AS2 (ld,%B0,X)          CR_TAB
++                      AS2 (mov,%A0,__tmp_reg__));
++            }
++          }
++
++          if (AVR_TINY) {
++            *l = 6;
++            return (AS2 (subi,r26,lo8(-%o1))      CR_TAB
++                    AS2 (sbci,r27,hi8(-%o1))      CR_TAB
++                    AS2 (ld,%A0,X+)		  CR_TAB
++                    AS2 (ld,%B0,X)                CR_TAB
++                    AS2 (subi,r26,lo8(%o1+1))     CR_TAB 
++                    AS2 (sbci,r27,hi8(%o1+1)));
++          } else {
++            *l = 4;
++            return (AS2 (adiw,r26,%o1) CR_TAB
++                    AS2 (ld,%A0,X+)    CR_TAB
++                    AS2 (ld,%B0,X)     CR_TAB
++                    AS2 (sbiw,r26,%o1+1));
++          }
+ 	}
+ 
+       if (reg_base == reg_dest)
+ 	{
+-	  *l = 3;
+ 	  op[2] = XEXP(base, 0);
+ 
+-	  if(REGNO(op[2]) == REG_Y)
+-			  return AVR_TINY ? ( AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
+-						AS2 (ld,__tmp_reg__,Y+)     CR_TAB
+-		                AS2 (ld,%B0,Y)         CR_TAB
+-						AS2 (subi,%A2,lo8(%o1+1)) CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1+1)) CR_TAB
+-						AS2 (mov,%A0,__tmp_reg__))
+-				         :  (AS2 (ldd,__tmp_reg__,%A1) CR_TAB
+-		                AS2 (ldd,%B0,%B1)         CR_TAB
+-		                AS2 (mov,%A0,__tmp_reg__));
+-	  if(REGNO(op[2]) == REG_Z)
+-			  return AVR_TINY ? ( AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
+-						AS2 (ld,__tmp_reg__,Z+)     CR_TAB
+-		                AS2 (ld,%B0,Z)         CR_TAB
+-						AS2 (subi,%A2,lo8(%o1+1)) CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1+1)) CR_TAB
+-						AS2 (mov,%A0,__tmp_reg__))
+-				         :  (AS2 (ldd,__tmp_reg__,%A1) CR_TAB
+-		  AS2 (ldd,%B0,%B1)         CR_TAB
+-		  AS2 (mov,%A0,__tmp_reg__));
++	  if(REGNO(op[2]) == REG_Y) {
++            if (AVR_TINY) {
++              *l = 7;
++              return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
++                      AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
++                      AS2 (ld,__tmp_reg__,Y+)    CR_TAB
++                      AS2 (ld,%B0,Y)             CR_TAB
++                      AS2 (subi,%A2,lo8(%o1+1))  CR_TAB
++                      AS2 (sbci,%B2,hi8(%o1+1))  CR_TAB
++                      AS2 (mov,%A0,__tmp_reg__));
++            } else {
++              *l = 3;
++              return (AS2 (ldd,__tmp_reg__,%A1) CR_TAB
++                      AS2 (ldd,%B0,%B1)         CR_TAB
++                      AS2 (mov,%A0,__tmp_reg__));
++            }
++          }
++	  if(REGNO(op[2]) == REG_Z) {
++            if (AVR_TINY) {
++              *l = 7;
++              return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
++                      AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
++                      AS2 (ld,__tmp_reg__,Z+)    CR_TAB
++                      AS2 (ld,%B0,Z)             CR_TAB
++                      AS2 (subi,%A2,lo8(%o1+1))  CR_TAB
++                      AS2 (sbci,%B2,hi8(%o1+1))  CR_TAB
++                      AS2 (mov,%A0,__tmp_reg__));
++            } else {
++              *l = 3;
++              return (AS2 (ldd,__tmp_reg__,%A1) CR_TAB
++                      AS2 (ldd,%B0,%B1)         CR_TAB
++                      AS2 (mov,%A0,__tmp_reg__));
++            }
++          }
+ 	}
+-      *l = 2;
+ 
+ 	  op[2] = XEXP(base, 0);
+ 
+ 	  if(REGNO(op[2]) == REG_Y)
+-			  return AVR_TINY ? ( AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
+-						AS2 (ld,%A0,Y+)             CR_TAB
+-		                AS2 (ld,%B0,Y)               CR_TAB
+-						AS2 (subi,%A2,lo8(%o1+1)) CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1+1)))
+-				         :  (AS2 (ldd,%A0,%A1) CR_TAB
+-		                AS2 (ldd,%B0,%B1));
++          {
++            if (AVR_TINY) {
++              *l = 6;
++              return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
++                      AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
++                      AS2 (ld,%A0,Y+)            CR_TAB
++                      AS2 (ld,%B0,Y)             CR_TAB
++                      AS2 (subi,%A2,lo8(%o1+1))  CR_TAB
++                      AS2 (sbci,%B2,hi8(%o1+1)));
++            } else {
++              *l = 2;
++              return (AS2 (ldd,%A0,%A1) CR_TAB
++                      AS2 (ldd,%B0,%B1));
++            }
++          }
+ 	  if(REGNO(op[2]) == REG_Z)
+-			  return AVR_TINY ? ( AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
+-						AS2 (ld,%A0,Z+)             CR_TAB
+-		                AS2 (ld,%B0,Z)              CR_TAB
+-						AS2 (subi,%A2,lo8(%o1+1)) CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1+1)))
+-				         :  (AS2 (ldd,%A0,%A1) CR_TAB
+-	      AS2 (ldd,%B0,%B1));
++          {
++            if (AVR_TINY) {
++              *l = 6;
++              return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
++                      AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
++                      AS2 (ld,%A0,Z+)            CR_TAB
++                      AS2 (ld,%B0,Z)             CR_TAB
++                      AS2 (subi,%A2,lo8(%o1+1))  CR_TAB
++                      AS2 (sbci,%B2,hi8(%o1+1)));
++            } else {
++              *l = 2;
++              return (AS2 (ldd,%A0,%A1) CR_TAB
++                      AS2 (ldd,%B0,%B1));
++            }
++          }
+       
+     }
+   else if (GET_CODE (base) == PRE_DEC) /* (--R) */
+@@ -2450,35 +2563,43 @@ out_movhi_r_mr (rtx insn, rtx op[], int 
+       if (mem_volatile_p)
+         {
+           if (REGNO (XEXP (base, 0)) == REG_X)
+-            {
++          {
++            if (AVR_TINY) {
++              *l = 6;
++              return (AS2 (subi,r26,lo8(2))  CR_TAB
++                      AS2 (sbci,r27,hi8(2))  CR_TAB
++                      AS2 (ld,%A0,X+)        CR_TAB
++                      AS2 (ld,%B0,X)         CR_TAB
++                      AS2 (subi,r26,lo8(1))  CR_TAB
++                      AS2 (sbci,r27,hi8(1)));
++            } else {
+               *l = 4;
+-              return AVR_TINY ? (AS2 (subi,r26,lo8(2))  CR_TAB
+-					    AS2 (sbci,r27,hi8(2))   CR_TAB
+-                        AS2 (ld,%A0,X+)            CR_TAB
+-                        AS2 (ld,%B0,X)             CR_TAB
+-						AS2 (subi,r26,lo8(1))  CR_TAB
+-						AS2 (sbci,r27,hi8(1)))
+-				         : (AS2 (sbiw,r26,2)  CR_TAB
++              return (AS2 (sbiw,r26,2)  CR_TAB
+                       AS2 (ld,%A0,X+)   CR_TAB
+                       AS2 (ld,%B0,X)    CR_TAB
+                       AS2 (sbiw,r26,1));
+             }
++          }
+           else
+-            {
++          {
++            //FIXME:check the code once again for AVR_TINY
++            if (AVR_TINY) {
++              *l = 8;
++              return (AS2 (subi,%A1,lo8(3))  CR_TAB
++                      AS2 (sbci,%B1,hi8(3))  CR_TAB
++                      AS2 (ld,%A0,%p1)       CR_TAB
++                      AS2 (subi,%A1,lo8(-1)) CR_TAB
++                      AS2 (sbci,%B1,hi8(-1)) CR_TAB
++                      AS2 (ld,%B0,%p1)       CR_TAB
++                      AS2 (subi,%A1,lo8(1))  CR_TAB
++                      AS2 (sbci,%B1,hi8(1)));
++            } else {
+               *l = 3;
+-			  //FIXME:check the code once again for AVR_TINY
+-              return AVR_TINY ? (AS2 (subi,%A1,lo8(3))  CR_TAB 
+-					    AS2 (sbci,%B1,hi8(3))  CR_TAB
+-                        AS2 (ld,%A0,%p1)       CR_TAB
+-						AS2 (subi,%A1,lo8(-1)) CR_TAB
+-						AS2 (sbci,%B1,hi8(-1)) CR_TAB
+-                        AS2 (ld,%B0,%p1)       CR_TAB
+-						AS2 (subi,%A1,lo8(1)) CR_TAB
+-						AS2 (sbci,%B1,hi8(1)))
+-				         : (AS2 (sbiw,%r1,2)   CR_TAB
+-                      AS2 (ld,%A0,%p1)  CR_TAB
++              return (AS2 (sbiw,%r1,2)   CR_TAB
++                      AS2 (ld,%A0,%p1)   CR_TAB
+                       AS2 (ldd,%B0,%p1+1));
+             }
++          }
+         }
+ 
+       *l = 2;
+@@ -2529,24 +2650,30 @@ out_movsi_r_mr (rtx insn, rtx op[], int 
+     {
+       if (reg_base == REG_X)        /* (R26) */
+         {
+-          if (reg_dest == REG_X)
++          if (reg_dest == REG_X) {
+ 	    /* "ld r26,-X" is undefined */
+-	    return *l=7, AVR_TINY ? (AS2 (subi,r26,lo8(-3))  CR_TAB
+-						AS2 (sbci,r27,hi8(-3))  CR_TAB
+-			            AS2 (ld,r29,X)          CR_TAB
+-			            AS2 (ld,r28,-X)         CR_TAB
+-			            AS2 (ld,__tmp_reg__,-X) CR_TAB
+-			            AS2 (subi,r26,lo8(1))   CR_TAB
+-			            AS2 (sbci,r27,hi8(1))   CR_TAB
+-			            AS2 (ld,r26,X)          CR_TAB
+-			            AS2 (mov,r27,__tmp_reg__))
+-			             : (AS2 (adiw,r26,3)        CR_TAB
+-			  AS2 (ld,r29,X)          CR_TAB
+-			  AS2 (ld,r28,-X)         CR_TAB
+-			  AS2 (ld,__tmp_reg__,-X) CR_TAB
+-			  AS2 (sbiw,r26,1)        CR_TAB
+-			  AS2 (ld,r26,X)          CR_TAB
+-			  AS2 (mov,r27,__tmp_reg__));
++            if (AVR_TINY) {
++              *l = 9;
++              return (AS2 (subi,r26,lo8(-3))  CR_TAB
++                      AS2 (sbci,r27,hi8(-3))  CR_TAB
++         	      AS2 (ld,r29,X)          CR_TAB
++                      AS2 (ld,r28,-X)         CR_TAB
++                      AS2 (ld,__tmp_reg__,-X) CR_TAB
++                      AS2 (subi,r26,lo8(1))   CR_TAB
++                      AS2 (sbci,r27,hi8(1))   CR_TAB
++                      AS2 (ld,r26,X)          CR_TAB
++                      AS2 (mov,r27,__tmp_reg__));
++            } else {
++              *l = 7;
++              return (AS2 (adiw,r26,3)        CR_TAB
++                      AS2 (ld,r29,X)          CR_TAB
++                      AS2 (ld,r28,-X)         CR_TAB
++                      AS2 (ld,__tmp_reg__,-X) CR_TAB
++                      AS2 (sbiw,r26,1)        CR_TAB
++                      AS2 (ld,r26,X)          CR_TAB
++                      AS2 (mov,r27,__tmp_reg__));
++            }
++          }
+ 
+           else if (reg_dest == REG_X - 2)
+             return *l=5, (AS2 (ld,%A0,X+)  CR_TAB
+@@ -2559,113 +2686,154 @@ out_movsi_r_mr (rtx insn, rtx op[], int 
+                            AS2 (ld,%B0,X+) CR_TAB
+                            AS2 (ld,%C0,X+) CR_TAB
+                            AS2 (ld,%D0,X));
+-          else
+-            return  *l=5, AVR_TINY ? (AS2 (ld,%A0,X+) CR_TAB
+-                             AS2 (ld,%B0,X+) CR_TAB
+-                             AS2 (ld,%C0,X+) CR_TAB
+-                             AS2 (ld,%D0,X)  CR_TAB
+-                             AS2 (subi,r26,lo8(3)) CR_TAB
+-                             AS2 (sbci,r27,hi8(3)))
+-					          : (AS2 (ld,%A0,X+) CR_TAB
+-                           AS2 (ld,%B0,X+) CR_TAB
+-                           AS2 (ld,%C0,X+) CR_TAB
+-                           AS2 (ld,%D0,X)  CR_TAB
+-                           AS2 (sbiw,r26,3));
++          else {
++            if (AVR_TINY) {
++              *l = 6;
++              return (AS2 (ld,%A0,X+) CR_TAB
++                      AS2 (ld,%B0,X+) CR_TAB
++                      AS2 (ld,%C0,X+) CR_TAB
++                      AS2 (ld,%D0,X)  CR_TAB
++                      AS2 (subi,r26,lo8(3)) CR_TAB
++                      AS2 (sbci,r27,hi8(3)));
++            } else {
++              *l = 5;
++              return (AS2 (ld,%A0,X+) CR_TAB
++                      AS2 (ld,%B0,X+) CR_TAB
++                      AS2 (ld,%C0,X+) CR_TAB
++                      AS2 (ld,%D0,X)  CR_TAB
++                      AS2 (sbiw,r26,3));
++            }
++          }
+         }
+       else
+         {
+           if (reg_dest == reg_base)
+-		  {
+-			  if(reg_base == REG_Y)
+-            return *l=5, AVR_TINY ? (AS2 (subi,r28,lo8(-3)) CR_TAB
+-							AS2 (sbci,r29,hi8(-3)) CR_TAB
+-				            AS2 (ld,%D0,Y)        CR_TAB
+-                            AS2 (ld,%C0,-Y)        CR_TAB
+-                            AS2 (subi,r28,lo8(1)) CR_TAB
+-                            AS2 (sbci,r29,hi8(1)) CR_TAB
+-                            AS2 (ld,__tmp_reg__,%1)  CR_TAB
+-                            AS2 (subi,r28,lo8(1)) CR_TAB
+-                            AS2 (sbci,r29,hi8(1)) CR_TAB
+-                            AS2 (ld,%A0,%1)  CR_TAB
+-                            AS2 (mov,%B0,__tmp_reg__))
+-				             : (AS2 (ldd,%D0,%1+3) CR_TAB
+-                            AS2 (ldd,%C0,%1+2) CR_TAB
+-                            AS2 (ldd,__tmp_reg__,%1+1)  CR_TAB
+-                            AS2 (ld,%A0,%1)  CR_TAB
+-                            AS2 (mov,%B0,__tmp_reg__));
+-			  if(reg_base == REG_Z)
+-            return *l=5, AVR_TINY ? (AS2 (subi,r30,lo8(-3)) CR_TAB
+-							AS2 (sbci,r31,hi8(-3)) CR_TAB
+-				            AS2 (ld,%D0,Z)        CR_TAB
+-                            AS2 (ld,%C0,-Z)        CR_TAB
+-                            AS2 (subi,r30,lo8(1)) CR_TAB
+-                            AS2 (sbci,r31,hi8(1)) CR_TAB
+-                            AS2 (ld,__tmp_reg__,%1)  CR_TAB
+-                            AS2 (subi,r30,lo8(1)) CR_TAB
+-                            AS2 (sbci,r31,hi8(1)) CR_TAB
+-                            AS2 (ld,%A0,%1)  CR_TAB
+-                            AS2 (mov,%B0,__tmp_reg__))
+-				             : (AS2 (ldd,%D0,%1+3) CR_TAB
+-                          AS2 (ldd,%C0,%1+2) CR_TAB
+-                          AS2 (ldd,__tmp_reg__,%1+1)  CR_TAB
+-                          AS2 (ld,%A0,%1)  CR_TAB
+-                          AS2 (mov,%B0,__tmp_reg__));
+-		  }
++	  {
++            if(reg_base == REG_Y) {
++              if (AVR_TINY) {
++                *l = 11;
++                return (AS2 (subi,r28,lo8(-3)) CR_TAB
++                        AS2 (sbci,r29,hi8(-3)) CR_TAB
++                        AS2 (ld,%D0,Y)         CR_TAB
++                        AS2 (ld,%C0,-Y)        CR_TAB
++                        AS2 (subi,r28,lo8(1))  CR_TAB
++                        AS2 (sbci,r29,hi8(1))  CR_TAB
++                        AS2 (ld,__tmp_reg__,%1)  CR_TAB
++                        AS2 (subi,r28,lo8(1)) CR_TAB
++                        AS2 (sbci,r29,hi8(1)) CR_TAB
++                        AS2 (ld,%A0,%1)  CR_TAB
++                        AS2 (mov,%B0,__tmp_reg__));
++              } else {
++                *l = 5;
++                return (AS2 (ldd,%D0,%1+3) CR_TAB
++                        AS2 (ldd,%C0,%1+2) CR_TAB
++                        AS2 (ldd,__tmp_reg__,%1+1)  CR_TAB
++                        AS2 (ld,%A0,%1)  CR_TAB
++                        AS2 (mov,%B0,__tmp_reg__));
++              }
++            }
+ 
++            if(reg_base == REG_Z) {
++              if (AVR_TINY) {
++                *l = 11;
++                return (AS2 (subi,r30,lo8(-3)) CR_TAB
++                        AS2 (sbci,r31,hi8(-3)) CR_TAB
++                        AS2 (ld,%D0,Z)         CR_TAB
++                        AS2 (ld,%C0,-Z)        CR_TAB
++                        AS2 (subi,r30,lo8(1))  CR_TAB
++                        AS2 (sbci,r31,hi8(1))  CR_TAB
++                        AS2 (ld,__tmp_reg__,%1)  CR_TAB
++                        AS2 (subi,r30,lo8(1)) CR_TAB
++                        AS2 (sbci,r31,hi8(1)) CR_TAB
++                        AS2 (ld,%A0,%1)  CR_TAB
++                        AS2 (mov,%B0,__tmp_reg__));
++              } else {
++                *l = 5;
++                return (AS2 (ldd,%D0,%1+3) CR_TAB
++                        AS2 (ldd,%C0,%1+2) CR_TAB
++                        AS2 (ldd,__tmp_reg__,%1+1)  CR_TAB
++                        AS2 (ld,%A0,%1)  CR_TAB
++                        AS2 (mov,%B0,__tmp_reg__));
++              }
++            }
++          }
+           else if (reg_base == reg_dest + 2)
+-		  {
+-			  if(reg_base == REG_Y)
+-            return *l=5, AVR_TINY ? (AS2 (ld ,%A0,Y+)       CR_TAB
+-                            AS2 (ld,%B0,Y+) CR_TAB
+-                            AS2 (ld,__tmp_reg__,Y+) CR_TAB
+-                            AS2 (ld,%D0,Y) CR_TAB
+-                            AS2 (subi,r28,lo8(3)) CR_TAB
+-                            AS2 (sbci,r29,hi8(3)) CR_TAB
+-                            AS2 (mov,%C0,__tmp_reg__))
+-				             : (AS2 (ld ,%A0,%1)    CR_TAB
+-                            AS2 (ldd,%B0,%1+1) CR_TAB
+-                            AS2 (ldd,__tmp_reg__,%1+2)  CR_TAB
+-                            AS2 (ldd,%D0,%1+3) CR_TAB
+-                            AS2 (mov,%C0,__tmp_reg__));
+-			  if(reg_base == REG_Z)
+-            return *l=5, AVR_TINY ? (AS2 (ld ,%A0,Z+)       CR_TAB
+-                            AS2 (ld,%B0,Z+) CR_TAB
+-                            AS2 (ld,__tmp_reg__,Z+) CR_TAB
+-                            AS2 (ld,%D0,Z) CR_TAB
+-                            AS2 (subi,r30,lo8(3)) CR_TAB
+-                            AS2 (sbci,r31,hi8(3)) CR_TAB
+-                            AS2 (mov,%C0,__tmp_reg__))
+-				             : (AS2 (ld ,%A0,%1)    CR_TAB
+-                          AS2 (ldd,%B0,%1+1) CR_TAB
+-                          AS2 (ldd,__tmp_reg__,%1+2)  CR_TAB
+-                          AS2 (ldd,%D0,%1+3) CR_TAB
+-                          AS2 (mov,%C0,__tmp_reg__));
+-		  }
+-          else
+-		  {
+-			  if(reg_base == REG_Y)
+-            return *l=4, AVR_TINY ? (AS2 (ld ,%A0,Y+)   CR_TAB
+-                            AS2 (ld,%B0,Y+) CR_TAB
+-                            AS2 (ld,%C0,Y+) CR_TAB
+-                            AS2 (ld,%D0,Y)  CR_TAB
+-                            AS2 (subi,r28,lo8(3)) CR_TAB
+-                            AS2 (sbci,r29,hi8(3)))
+-						     : (AS2 (ld ,%A0,%1)   CR_TAB
+-                          AS2 (ldd,%B0,%1+1) CR_TAB
+-                          AS2 (ldd,%C0,%1+2) CR_TAB
+-                          AS2 (ldd,%D0,%1+3));
+-			  if(reg_base == REG_Z)
+-            return *l=4, AVR_TINY ? (AS2 (ld ,%A0,Z+)   CR_TAB
+-                            AS2 (ld,%B0,Z+) CR_TAB
+-                            AS2 (ld,%C0,Z+) CR_TAB
+-                            AS2 (ld,%D0,Z) CR_TAB
+-                            AS2 (subi,r30,lo8(3)) CR_TAB
+-                            AS2 (sbci,r31,hi8(3))) 
+-						     : (AS2 (ld ,%A0,%1)   CR_TAB
+-                            AS2 (ldd,%B0,%1+1) CR_TAB
+-                            AS2 (ldd,%C0,%1+2) CR_TAB
+-                            AS2 (ldd,%D0,%1+3));
+-        }
++          {
++            if(reg_base == REG_Y) {
++              if (AVR_TINY) {
++                *l = 7;
++                return (AS2 (ld ,%A0,Y+)       CR_TAB
++                        AS2 (ld,%B0,Y+) CR_TAB
++                        AS2 (ld,__tmp_reg__,Y+) CR_TAB
++                        AS2 (ld,%D0,Y) CR_TAB
++                        AS2 (subi,r28,lo8(3)) CR_TAB
++                        AS2 (sbci,r29,hi8(3)) CR_TAB
++                        AS2 (mov,%C0,__tmp_reg__));
++              } else {
++                *l = 5;
++                return (AS2 (ld ,%A0,%1)    CR_TAB
++                        AS2 (ldd,%B0,%1+1) CR_TAB
++                        AS2 (ldd,__tmp_reg__,%1+2)  CR_TAB
++                        AS2 (ldd,%D0,%1+3) CR_TAB
++                        AS2 (mov,%C0,__tmp_reg__));
++              }
++            }
++
++            if(reg_base == REG_Z) {
++              if (AVR_TINY) {
++                *l = 7;
++                return (AS2 (ld ,%A0,Z+) CR_TAB
++                        AS2 (ld,%B0,Z+) CR_TAB
++                        AS2 (ld,__tmp_reg__,Z+) CR_TAB
++                        AS2 (ld,%D0,Z) CR_TAB
++                        AS2 (subi,r30,lo8(3)) CR_TAB
++                        AS2 (sbci,r31,hi8(3)) CR_TAB
++                        AS2 (mov,%C0,__tmp_reg__));
++              } else {
++                *l = 5;
++                return (AS2 (ld ,%A0,%1)    CR_TAB
++                        AS2 (ldd,%B0,%1+1) CR_TAB
++                        AS2 (ldd,__tmp_reg__,%1+2)  CR_TAB
++                        AS2 (ldd,%D0,%1+3) CR_TAB
++                        AS2 (mov,%C0,__tmp_reg__));
++              }
++            }
++          } else {
++            if(reg_base == REG_Y) {
++              if (AVR_TINY) {
++                *l = 6;
++                return (AS2 (ld ,%A0,Y+) CR_TAB
++                        AS2 (ld,%B0,Y+) CR_TAB
++                        AS2 (ld,%C0,Y+) CR_TAB
++                        AS2 (ld,%D0,Y) CR_TAB
++                        AS2 (subi,r28,lo8(3)) CR_TAB
++                        AS2 (sbci,r29,hi8(3)));
++              } else {
++                *l = 4;
++                return (AS2 (ld ,%A0,%1)   CR_TAB
++                        AS2 (ldd,%B0,%1+1) CR_TAB
++                        AS2 (ldd,%C0,%1+2) CR_TAB
++                        AS2 (ldd,%D0,%1+3));
++              }
++            }
++            if(reg_base == REG_Z) {
++              if (AVR_TINY) {
++                *l = 6;
++                return (AS2 (ld ,%A0,Z+) CR_TAB
++                        AS2 (ld,%B0,Z+) CR_TAB
++                        AS2 (ld,%C0,Z+) CR_TAB
++                        AS2 (ld,%D0,Z) CR_TAB
++                        AS2 (subi,r30,lo8(3)) CR_TAB
++                        AS2 (sbci,r31,hi8(3)));
++              } else {
++                *l = 4;
++                return (AS2 (ld ,%A0,%1)   CR_TAB
++                        AS2 (ldd,%B0,%1+1) CR_TAB
++                        AS2 (ldd,%C0,%1+2) CR_TAB
++                        AS2 (ldd,%D0,%1+3));
++              }
++            }
++          }
+         }
+     }
+   else if (GET_CODE (base) == PLUS) /* (R + i) */
+@@ -2677,44 +2845,54 @@ out_movsi_r_mr (rtx insn, rtx op[], int 
+ 	  if (REGNO (XEXP (base, 0)) != REG_Y)
+ 	    fatal_insn ("incorrect insn:",insn);
+ 
+-	  if (disp <= 63 + MAX_LD_OFFSET (GET_MODE (src)))
+-	    return *l = 6, AVR_TINY ? (AS2 (subi,r28,lo8(-(%o1-60))) CR_TAB
+-						  AS2 (sbci,r29,hi8(-(%o1-60))) CR_TAB
+-                          AS2 (subi,r28,lo8(-60)) CR_TAB
+-                          AS2 (sbci,r29,hi8(-60)) CR_TAB
+-						  AS2 (ld,%A0,Y+)    CR_TAB
+-						  AS2 (ld,%B0,Y+)    CR_TAB
+-						  AS2 (ld,%C0,Y+)    CR_TAB
+-						  AS2 (ld,%D0,Y)    CR_TAB
+-                          AS2 (subi,r28,lo8(63)) CR_TAB
+-                          AS2 (sbci,r29,hi8(63)) CR_TAB
+-                          AS2 (subi,r28,lo8(%o1-60)) CR_TAB
+-                          AS2 (sbci,r29,hi8(%o1-60)))
+-						   : (AS2 (adiw,r28,%o1-60) CR_TAB
+-			    AS2 (ldd,%A0,Y+60)    CR_TAB
+-			    AS2 (ldd,%B0,Y+61)    CR_TAB
+-			    AS2 (ldd,%C0,Y+62)    CR_TAB
+-			    AS2 (ldd,%D0,Y+63)    CR_TAB
+-			    AS2 (sbiw,r28,%o1-60));
+-
+-	  return *l = 8, AVR_TINY ? (AS2 (subi,r28,lo8(-%o1)) CR_TAB
+-						AS2 (sbci,r29,hi8(-%o1)) CR_TAB
+-						AS2 (ld,%A0,Y+)           CR_TAB
+-						AS2 (ld,%B0,Y+)           CR_TAB
+-						AS2 (ld,%C0,Y+)           CR_TAB
+-						AS2 (ld,%D0,Y)           CR_TAB
+-                        AS2 (subi,r28,lo8(3))   CR_TAB
+-                        AS2 (sbci,r29,hi8(3))   CR_TAB
+-						AS2 (subi,r28,lo8(%o1))  CR_TAB
+-						AS2 (sbci,r29,hi8(%o1)))
+-			             : (AS2 (subi,r28,lo8(-%o1)) CR_TAB
+-			  AS2 (sbci,r29,hi8(-%o1)) CR_TAB
+-			  AS2 (ld,%A0,Y)           CR_TAB
+-			  AS2 (ldd,%B0,Y+1)        CR_TAB
+-			  AS2 (ldd,%C0,Y+2)        CR_TAB
+-			  AS2 (ldd,%D0,Y+3)        CR_TAB
+-			  AS2 (subi,r28,lo8(%o1))  CR_TAB
+-			  AS2 (sbci,r29,hi8(%o1)));
++	  if (disp <= 63 + MAX_LD_OFFSET (GET_MODE (src))) {
++	    if (AVR_TINY) {
++              *l = 12;
++              return (AS2 (subi,r28,lo8(-(%o1-60))) CR_TAB
++                      AS2 (sbci,r29,hi8(-(%o1-60))) CR_TAB
++                      AS2 (subi,r28,lo8(-60)) CR_TAB
++                      AS2 (sbci,r29,hi8(-60)) CR_TAB
++                      AS2 (ld,%A0,Y+)    CR_TAB
++                      AS2 (ld,%B0,Y+)    CR_TAB
++		      AS2 (ld,%C0,Y+)    CR_TAB
++                      AS2 (ld,%D0,Y)    CR_TAB
++                      AS2 (subi,r28,lo8(63)) CR_TAB
++                      AS2 (sbci,r29,hi8(63)) CR_TAB
++                      AS2 (subi,r28,lo8(%o1-60)) CR_TAB
++                      AS2 (sbci,r29,hi8(%o1-60)));
++            } else {
++              *l = 6;
++              return (AS2 (adiw,r28,%o1-60) CR_TAB
++                      AS2 (ldd,%A0,Y+60)    CR_TAB
++                      AS2 (ldd,%B0,Y+61)    CR_TAB
++                      AS2 (ldd,%C0,Y+62)    CR_TAB
++                      AS2 (ldd,%D0,Y+63)    CR_TAB
++                      AS2 (sbiw,r28,%o1-60));
++            }
++          }
++          if (AVR_TINY) {
++            *l = 10;
++            return (AS2 (subi,r28,lo8(-%o1)) CR_TAB
++                    AS2 (sbci,r29,hi8(-%o1)) CR_TAB
++                    AS2 (ld,%A0,Y+)          CR_TAB
++                    AS2 (ld,%B0,Y+)          CR_TAB
++                    AS2 (ld,%C0,Y+)          CR_TAB
++                    AS2 (ld,%D0,Y)           CR_TAB
++                    AS2 (subi,r28,lo8(3))    CR_TAB
++                    AS2 (sbci,r29,hi8(3))    CR_TAB
++                    AS2 (subi,r28,lo8(%o1))  CR_TAB
++                    AS2 (sbci,r29,hi8(%o1)));
++          } else {
++            *l = 8;
++            return (AS2 (subi,r28,lo8(-%o1)) CR_TAB
++                    AS2 (sbci,r29,hi8(-%o1)) CR_TAB
++                    AS2 (ld,%A0,Y)           CR_TAB
++                    AS2 (ldd,%B0,Y+1)        CR_TAB
++                    AS2 (ldd,%C0,Y+2)        CR_TAB
++                    AS2 (ldd,%D0,Y+3)        CR_TAB
++                    AS2 (subi,r28,lo8(%o1))  CR_TAB
++                    AS2 (sbci,r29,hi8(%o1)));
++          }
+ 	}
+ 
+       reg_base = true_regnum (XEXP (base, 0));
+@@ -2722,154 +2900,204 @@ out_movsi_r_mr (rtx insn, rtx op[], int 
+ 	{
+ 	  /* R = (X + d) */
+ 	  if (reg_dest == REG_X)
+-	    {
+-	      *l = 7;
+-	      /* "ld r26,-X" is undefined */
+-	      return AVR_TINY ? (AS2 (subi,r26,lo8(-(%o1+3)))  CR_TAB
+-					AS2 (sbci,r27,hi8(-(%o1+3)))  CR_TAB
+-					AS2 (ld,r29,X)          CR_TAB
+-		            AS2 (ld,r28,-X)         CR_TAB
+-		            AS2 (ld,__tmp_reg__,-X) CR_TAB
+-                    AS2 (subi,r26,lo8(1))   CR_TAB
+-                    AS2 (sbci,r27,hi8(1))   CR_TAB
+-		            AS2 (ld,r26,X)          CR_TAB
+-		            AS2 (mov,r27,__tmp_reg__))
+-		             : (AS2 (adiw,r26,%o1+3)    CR_TAB
+-		      AS2 (ld,r29,X)          CR_TAB
+-		      AS2 (ld,r28,-X)         CR_TAB
+-		      AS2 (ld,__tmp_reg__,-X) CR_TAB
+-		      AS2 (sbiw,r26,1)        CR_TAB
+-		      AS2 (ld,r26,X)          CR_TAB
+-		      AS2 (mov,r27,__tmp_reg__));
+-	    }
+-	  *l = 6;
+-	  if (reg_dest == REG_X - 2)
+-	    return AVR_TINY ? (AS2 (subi,r26,lo8(-(%o1))) CR_TAB
+-				  AS2 (sbci,r27,hi8(-(%o1))) CR_TAB
+-		          AS2 (ld,r24,X+)         CR_TAB
+-		          AS2 (ld,r25,X+)         CR_TAB
+-		          AS2 (ld,__tmp_reg__,X+) CR_TAB
+-		          AS2 (ld,r27,X)          CR_TAB
+-		          AS2 (mov,r26,__tmp_reg__))
+-		           : (AS2 (adiw,r26,%o1)      CR_TAB
+-		    AS2 (ld,r24,X+)         CR_TAB
+-		    AS2 (ld,r25,X+)         CR_TAB
+-		    AS2 (ld,__tmp_reg__,X+) CR_TAB
+-		    AS2 (ld,r27,X)          CR_TAB
+-		    AS2 (mov,r26,__tmp_reg__));
+-
+-	  return AVR_TINY ? (AS2 (subi,r26,lo8(-(%o1))) CR_TAB
+-			    AS2 (sbci,r27,hi8(-(%o1))) CR_TAB
+-		        AS2 (ld,%A0,X+)    CR_TAB
+-		        AS2 (ld,%B0,X+)    CR_TAB
+-		        AS2 (ld,%C0,X+)    CR_TAB
+-		        AS2 (ld,%D0,X)     CR_TAB
+-		        AS2 (subi,r26,lo8(%o1+3)) CR_TAB
+-				AS2 (sbci,r27,hi8(%o1+3)))
+-				 : (AS2 (adiw,r26,%o1) CR_TAB
+-		  AS2 (ld,%A0,X+)    CR_TAB
+-		  AS2 (ld,%B0,X+)    CR_TAB
+-		  AS2 (ld,%C0,X+)    CR_TAB
+-		  AS2 (ld,%D0,X)     CR_TAB
+-		  AS2 (sbiw,r26,%o1+3));
++	  {
++	    /* "ld r26,-X" is undefined */
++            if (AVR_TINY) {
++              *l = 9;
++              return (AS2 (subi,r26,lo8(-(%o1+3)))  CR_TAB
++                      AS2 (sbci,r27,hi8(-(%o1+3)))  CR_TAB
++                      AS2 (ld,r29,X)          CR_TAB
++                      AS2 (ld,r28,-X)         CR_TAB
++                      AS2 (ld,__tmp_reg__,-X) CR_TAB
++                      AS2 (subi,r26,lo8(1))   CR_TAB
++                      AS2 (sbci,r27,hi8(1))   CR_TAB
++                      AS2 (ld,r26,X)          CR_TAB
++                      AS2 (mov,r27,__tmp_reg__));
++            } else {
++              *l = 7;
++              return (AS2 (adiw,r26,%o1+3)    CR_TAB
++                      AS2 (ld,r29,X)          CR_TAB
++                      AS2 (ld,r28,-X)         CR_TAB
++                      AS2 (ld,__tmp_reg__,-X) CR_TAB
++                      AS2 (sbiw,r26,1)        CR_TAB
++                      AS2 (ld,r26,X)          CR_TAB
++                      AS2 (mov,r27,__tmp_reg__));
++            }
++	  }
++
++          if (reg_dest == REG_X - 2) {
++            if (AVR_TINY) {
++              *l = 7;
++              return (AS2 (subi,r26,lo8(-(%o1))) CR_TAB
++                      AS2 (sbci,r27,hi8(-(%o1))) CR_TAB
++                      AS2 (ld,r24,X+)         CR_TAB
++                      AS2 (ld,r25,X+)         CR_TAB
++                      AS2 (ld,__tmp_reg__,X+) CR_TAB
++                      AS2 (ld,r27,X)          CR_TAB
++                      AS2 (mov,r26,__tmp_reg__));
++            } else {
++              *l = 6;
++              return (AS2 (adiw,r26,%o1)      CR_TAB
++		      AS2 (ld,r24,X+)         CR_TAB
++		      AS2 (ld,r25,X+)         CR_TAB
++		      AS2 (ld,__tmp_reg__,X+) CR_TAB
++		      AS2 (ld,r27,X)          CR_TAB
++		      AS2 (mov,r26,__tmp_reg__));
++            }
++          }
++          
++          if (AVR_TINY) {
++            *l = 8;
++            return (AS2 (subi,r26,lo8(-(%o1))) CR_TAB
++                    AS2 (sbci,r27,hi8(-(%o1))) CR_TAB
++                    AS2 (ld,%A0,X+)    CR_TAB
++                    AS2 (ld,%B0,X+)    CR_TAB
++                    AS2 (ld,%C0,X+)    CR_TAB
++                    AS2 (ld,%D0,X)     CR_TAB
++                    AS2 (subi,r26,lo8(%o1+3)) CR_TAB
++                    AS2 (sbci,r27,hi8(%o1+3)));
++          } else {
++            *l = 6;
++            return (AS2 (adiw,r26,%o1) CR_TAB
++                    AS2 (ld,%A0,X+)    CR_TAB
++                    AS2 (ld,%B0,X+)    CR_TAB
++                    AS2 (ld,%C0,X+)    CR_TAB
++                    AS2 (ld,%D0,X)     CR_TAB
++                    AS2 (sbiw,r26,%o1+3));
++          }
+ 	}
+       if (reg_dest == reg_base)
+-	  {
+-			op[2] = XEXP(base, 0);
++      {
++        op[2] = XEXP(base, 0);
+ 
+-		if(REGNO(op[2]) == REG_Y)
+-        return *l=5, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o1+4))) CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1+4))) CR_TAB
+-						AS2 (ld,%D0,-Y)               CR_TAB
+-		                AS2 (ld,%C0,-Y)               CR_TAB
+-		                AS2 (ld,__tmp_reg__,-Y)       CR_TAB
+-		                AS2 (ld,%A0,-Y)               CR_TAB
+-                        AS2 (subi,%A2,lo8(%o1)) CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1)) CR_TAB
+-                        AS2 (mov,%B0,__tmp_reg__))
+-			             : (AS2 (ldd,%D0,%D1) CR_TAB
+-                        AS2 (ldd,%C0,%C1) CR_TAB
+-                        AS2 (ldd,__tmp_reg__,%B1)  CR_TAB
+-                        AS2 (ldd,%A0,%A1) CR_TAB
+-                        AS2 (mov,%B0,__tmp_reg__));
+-		if(REGNO(op[2]) == REG_Z)
+-        return *l=5, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o1+4))) CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1+4))) CR_TAB
+-						AS2 (ld,%D0,-Z)               CR_TAB
+-		                AS2 (ld,%C0,-Z)               CR_TAB
+-		                AS2 (ld,__tmp_reg__,-Z)       CR_TAB
+-		                AS2 (ld,%A0,-Z)               CR_TAB
+-                        AS2 (subi,%A2,lo8(%o1)) CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1)) CR_TAB
+-                        AS2 (mov,%B0,__tmp_reg__))
+-			             : (AS2 (ldd,%D0,%D1)			CR_TAB
+-                      AS2 (ldd,%C0,%C1) CR_TAB
+-                      AS2 (ldd,__tmp_reg__,%B1)  CR_TAB
+-                      AS2 (ldd,%A0,%A1) CR_TAB
+-                      AS2 (mov,%B0,__tmp_reg__));
+-	  }
+-      else if (reg_dest == reg_base - 2)
+-	  {
+-			op[2] = XEXP(base, 0);
++        if(REGNO(op[2]) == REG_Y) {
++          if (AVR_TINY) {
++            *l = 9;
++            return (AS2 (subi,%A2,lo8(-(%o1+4))) CR_TAB
++                    AS2 (sbci,%B2,hi8(-(%o1+4))) CR_TAB
++                    AS2 (ld,%D0,-Y)              CR_TAB
++                    AS2 (ld,%C0,-Y)              CR_TAB
++                    AS2 (ld,__tmp_reg__,-Y)      CR_TAB
++                    AS2 (ld,%A0,-Y)              CR_TAB
++                    AS2 (subi,%A2,lo8(%o1))      CR_TAB
++                    AS2 (sbci,%B2,hi8(%o1)) CR_TAB
++                    AS2 (mov,%B0,__tmp_reg__));
++          } else {
++            *l = 5;
++            return (AS2 (ldd,%D0,%D1) CR_TAB
++                    AS2 (ldd,%C0,%C1) CR_TAB
++                    AS2 (ldd,__tmp_reg__,%B1) CR_TAB
++                    AS2 (ldd,%A0,%A1) CR_TAB
++                    AS2 (mov,%B0,__tmp_reg__));
++          }
++        }
++        if(REGNO(op[2]) == REG_Z) {
++          if (AVR_TINY) {
++            *l = 9;
++            return (AS2 (subi,%A2,lo8(-(%o1+4))) CR_TAB
++                    AS2 (sbci,%B2,hi8(-(%o1+4))) CR_TAB
++                    AS2 (ld,%D0,-Z)              CR_TAB
++                    AS2 (ld,%C0,-Z)              CR_TAB
++                    AS2 (ld,__tmp_reg__,-Z)      CR_TAB
++                    AS2 (ld,%A0,-Z)              CR_TAB
++                    AS2 (subi,%A2,lo8(%o1)) CR_TAB
++                    AS2 (sbci,%B2,hi8(%o1)) CR_TAB
++                    AS2 (mov,%B0,__tmp_reg__));
++          } else {
++            *l = 5;
++            return (AS2 (ldd,%D0,%D1) CR_TAB
++                    AS2 (ldd,%C0,%C1) CR_TAB
++                    AS2 (ldd,__tmp_reg__,%B1) CR_TAB
++                    AS2 (ldd,%A0,%A1) CR_TAB
++                    AS2 (mov,%B0,__tmp_reg__));
++          }
++        }
++      } else if (reg_dest == reg_base - 2) {
++        op[2] = XEXP(base, 0);
+ 
+-		if(REGNO(op[2]) == REG_Y)
+-        return *l=5, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o1)))   CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1)))   CR_TAB
+-		                AS2 (ld,%A0,Y+)               CR_TAB
+-		                AS2 (ld,%B0,Y+)               CR_TAB
+-		                AS2 (ld,__tmp_reg__,Y+)       CR_TAB
+-						AS2 (ld,%D0,Y)               CR_TAB
+-						AS2 (subi,%A2,lo8(%o1+3)) CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1+3)) CR_TAB
+-                        AS2 (mov,%C0,__tmp_reg__)) 
+-			             : (AS2 (ldd,%A0,%A1)          CR_TAB
+-                      AS2 (ldd,%B0,%B1) CR_TAB
+-                      AS2 (ldd,__tmp_reg__,%C1)  CR_TAB
+-                      AS2 (ldd,%D0,%D1) CR_TAB
+-                      AS2 (mov,%C0,__tmp_reg__));
+-		if(REGNO(op[2]) == REG_Z)
+-        return *l=5, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o1)))   CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1)))   CR_TAB
+-		                AS2 (ld,%A0,Z+)              CR_TAB
+-		                AS2 (ld,%B0,Z+)              CR_TAB
+-		                AS2 (ld,__tmp_reg__,Z+)      CR_TAB
+-						AS2 (ld,%D0,Z)               CR_TAB
+-						AS2 (subi,%A2,lo8(%o1+3))    CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1+3))    CR_TAB
+-                        AS2 (mov,%C0,__tmp_reg__)) 
+-			             : (AS2 (ldd,%A0,%A1)          CR_TAB
+-                        AS2 (ldd,%B0,%B1)          CR_TAB
+-                        AS2 (ldd,__tmp_reg__,%C1)  CR_TAB
+-                        AS2 (ldd,%D0,%D1)          CR_TAB
+-                        AS2 (mov,%C0,__tmp_reg__));
+-	  }
+-			op[2] = XEXP(base, 0);
+-		if(REGNO(op[2]) == REG_Y)
+-        return *l=4, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o1)))   CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1)))   CR_TAB
+-		                AS2 (ld,%A0,Y+)               CR_TAB
+-		                AS2 (ld,%B0,Y+)               CR_TAB
+-		                AS2 (ld,%C0,Y+)               CR_TAB
+-						AS2 (ld,%D0,Y)                CR_TAB
+-						AS2 (subi,%A2,lo8(%o1+3)) CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1+3))) 
+-			             : (AS2 (ldd,%A0,%A1) CR_TAB
+-                        AS2 (ldd,%B0,%B1) CR_TAB
+-                        AS2 (ldd,%C0,%C1) CR_TAB
+-                        AS2 (ldd,%D0,%D1));
+-		if(REGNO(op[2]) == REG_Z)
+-        return *l=4, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o1)))   CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o1)))   CR_TAB
+-		                AS2 (ld,%A0,Z+)               CR_TAB
+-		                AS2 (ld,%B0,Z+)               CR_TAB
+-		                AS2 (ld,%C0,Z+)               CR_TAB
+-						AS2 (ld,%D0,Z)               CR_TAB
+-						AS2 (subi,%A2,lo8(%o1+3)) CR_TAB
+-						AS2 (sbci,%B2,hi8(%o1+3)))
+-			             : (AS2 (ldd,%A0,%A1) CR_TAB
++        if(REGNO(op[2]) == REG_Y) {
++          if (AVR_TINY) {
++            *l = 9;
++            return (AS2 (subi,%A2,lo8(-(%o1)))   CR_TAB
++                    AS2 (sbci,%B2,hi8(-(%o1)))   CR_TAB
++                    AS2 (ld,%A0,Y+)              CR_TAB
++                    AS2 (ld,%B0,Y+)              CR_TAB
++                    AS2 (ld,__tmp_reg__,Y+)      CR_TAB
++                    AS2 (ld,%D0,Y)               CR_TAB
++                    AS2 (subi,%A2,lo8(%o1+3)) CR_TAB
++                    AS2 (sbci,%B2,hi8(%o1+3)) CR_TAB
++                    AS2 (mov,%C0,__tmp_reg__));
++          } else {
++            *l = 5;
++            return (AS2 (ldd,%A0,%A1) CR_TAB
+                     AS2 (ldd,%B0,%B1) CR_TAB
+-                    AS2 (ldd,%C0,%C1) CR_TAB
+-                    AS2 (ldd,%D0,%D1));
++                    AS2 (ldd,__tmp_reg__,%C1) CR_TAB
++                    AS2 (ldd,%D0,%D1) CR_TAB
++                    AS2 (mov,%C0,__tmp_reg__));
++          }
++        }
++        if(REGNO(op[2]) == REG_Z) {
++          if (AVR_TINY) {
++            *l = 9;
++            return (AS2 (subi,%A2,lo8(-(%o1)))   CR_TAB
++                    AS2 (sbci,%B2,hi8(-(%o1)))   CR_TAB
++                    AS2 (ld,%A0,Z+)              CR_TAB
++                    AS2 (ld,%B0,Z+)              CR_TAB
++                    AS2 (ld,__tmp_reg__,Z+)      CR_TAB
++                    AS2 (ld,%D0,Z)               CR_TAB
++                    AS2 (subi,%A2,lo8(%o1+3))    CR_TAB
++                    AS2 (sbci,%B2,hi8(%o1+3))    CR_TAB
++                    AS2 (mov,%C0,__tmp_reg__));
++          } else {
++            *l = 5;
++            return (AS2 (ldd,%A0,%A1)          CR_TAB
++                    AS2 (ldd,%B0,%B1)          CR_TAB
++                    AS2 (ldd,__tmp_reg__,%C1)  CR_TAB
++                    AS2 (ldd,%D0,%D1)          CR_TAB
++                    AS2 (mov,%C0,__tmp_reg__));
++          }
++        }
++      }
++
++      op[2] = XEXP(base, 0);
++      if(REGNO(op[2]) == REG_Y) {
++        if (AVR_TINY) {
++          *l = 8;
++          return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
++                  AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
++                  AS2 (ld,%A0,Y+)            CR_TAB
++                  AS2 (ld,%B0,Y+)            CR_TAB
++                  AS2 (ld,%C0,Y+)            CR_TAB
++                  AS2 (ld,%D0,Y)             CR_TAB
++                  AS2 (subi,%A2,lo8(%o1+3)) CR_TAB
++                  AS2 (sbci,%B2,hi8(%o1+3)));
++        } else {
++          *l = 4;
++          return (AS2 (ldd,%A0,%A1) CR_TAB
++                  AS2 (ldd,%B0,%B1) CR_TAB
++                  AS2 (ldd,%C0,%C1) CR_TAB
++                  AS2 (ldd,%D0,%D1));
++        }
++      }
++      if(REGNO(op[2]) == REG_Z) {
++        if (AVR_TINY) {
++          *l = 8;
++          return (AS2 (subi,%A2,lo8(-(%o1))) CR_TAB
++                  AS2 (sbci,%B2,hi8(-(%o1))) CR_TAB
++                  AS2 (ld,%A0,Z+)            CR_TAB
++                  AS2 (ld,%B0,Z+)            CR_TAB
++                  AS2 (ld,%C0,Z+)            CR_TAB
++                  AS2 (ld,%D0,Z)             CR_TAB
++                  AS2 (subi,%A2,lo8(%o1+3)) CR_TAB
++                  AS2 (sbci,%B2,hi8(%o1+3)));
++        } else {
++          *l = 4;
++          return (AS2 (ldd,%A0,%A1) CR_TAB
++                  AS2 (ldd,%B0,%B1) CR_TAB
++                  AS2 (ldd,%C0,%C1) CR_TAB
++                  AS2 (ldd,%D0,%D1));
++        }
++      }
+     }
+   else if (GET_CODE (base) == PRE_DEC) /* (--R) */
+     return *l=4, (AS2 (ld,%D0,%1) CR_TAB
+@@ -2916,37 +3144,48 @@ out_movsi_mr_r (rtx insn, rtx op[], int 
+           if (reg_src == REG_X)
+             {
+ 	      /* "st X+,r26" is undefined */
+-              if (reg_unused_after (insn, base))
+-		return *l=6, AVR_TINY ? (AS2 (mov,__tmp_reg__,r27) CR_TAB
+-			            AS2 (st,X,r26)            CR_TAB
+-			            AS2 (subi,r26,lo8(-1))    CR_TAB
+-			            AS2 (sbci,r27,hi8(-1))    CR_TAB
+-			            AS2 (st,X+,__tmp_reg__)   CR_TAB
+-			            AS2 (st,X+,r28)           CR_TAB
+-			            AS2 (st,X,r29))
+-			             : (AS2 (mov,__tmp_reg__,r27) CR_TAB
+-			      AS2 (st,X,r26)            CR_TAB
+-			      AS2 (adiw,r26,1)          CR_TAB
+-			      AS2 (st,X+,__tmp_reg__)   CR_TAB
+-			      AS2 (st,X+,r28)           CR_TAB
+-			      AS2 (st,X,r29));
+-              else
+-        return *l=7, AVR_TINY ? (AS2 (mov,__tmp_reg__,r27) CR_TAB
+-			            AS2 (st,X,r26)            CR_TAB
+-			            AS2 (subi,r26,lo8(-1))    CR_TAB
+-			            AS2 (sbci,r27,hi8(-1))    CR_TAB
+-			            AS2 (st,X+,__tmp_reg__)   CR_TAB
+-			            AS2 (st,X+,r28)           CR_TAB
+-			            AS2 (st,X,r29)            CR_TAB
+-			            AS2 (subi,r26,lo8(3))     CR_TAB
+-			            AS2 (sbci,r27,hi8(3)))
+-				         : (AS2 (mov,__tmp_reg__,r27) CR_TAB
+-			      AS2 (st,X,r26)            CR_TAB
+-			      AS2 (adiw,r26,1)          CR_TAB
+-			      AS2 (st,X+,__tmp_reg__)   CR_TAB
+-			      AS2 (st,X+,r28)           CR_TAB
+-			      AS2 (st,X,r29)            CR_TAB
+-			      AS2 (sbiw,r26,3));
++              if (reg_unused_after (insn, base)) {
++                if (AVR_TINY) {
++                  *l = 7;
++                  return (AS2 (mov,__tmp_reg__,r27) CR_TAB
++                          AS2 (st,X,r26)            CR_TAB
++                          AS2 (subi,r26,lo8(-1))    CR_TAB
++                          AS2 (sbci,r27,hi8(-1))    CR_TAB
++                          AS2 (st,X+,__tmp_reg__)   CR_TAB
++                          AS2 (st,X+,r28)           CR_TAB
++                          AS2 (st,X,r29));
++                } else {
++                  *l = 6;
++                  return (AS2 (mov,__tmp_reg__,r27) CR_TAB
++                          AS2 (st,X,r26)            CR_TAB
++                          AS2 (adiw,r26,1)          CR_TAB
++                          AS2 (st,X+,__tmp_reg__)   CR_TAB
++                          AS2 (st,X+,r28)           CR_TAB
++                          AS2 (st,X,r29));
++                }
++              } else {
++                if (AVR_TINY) {
++                  *l = 9;
++                  return (AS2 (mov,__tmp_reg__,r27) CR_TAB
++                          AS2 (st,X,r26)            CR_TAB
++                          AS2 (subi,r26,lo8(-1))    CR_TAB
++                          AS2 (sbci,r27,hi8(-1))    CR_TAB
++                          AS2 (st,X+,__tmp_reg__)   CR_TAB
++                          AS2 (st,X+,r28)           CR_TAB
++                          AS2 (st,X,r29)            CR_TAB
++                          AS2 (subi,r26,lo8(3))     CR_TAB
++                          AS2 (sbci,r27,hi8(3)));
++                } else {
++                  *l = 7;
++                  return (AS2 (mov,__tmp_reg__,r27) CR_TAB
++                          AS2 (st,X,r26)            CR_TAB
++                          AS2 (adiw,r26,1)          CR_TAB
++                          AS2 (st,X+,__tmp_reg__)   CR_TAB
++                          AS2 (st,X+,r28)           CR_TAB
++                          AS2 (st,X,r29)            CR_TAB
++                          AS2 (sbiw,r26,3));
++                }
++              }
+             }
+           else if (reg_base == reg_src + 2)
+             {
+@@ -2958,61 +3197,84 @@ out_movsi_mr_r (rtx insn, rtx op[], int 
+                               AS2 (st,%0+,__zero_reg__)  CR_TAB
+                               AS2 (st,%0,__tmp_reg__)   CR_TAB
+                               AS1 (clr,__zero_reg__));
+-              else
+-                return *l=8, AVR_TINY ? (AS2 (mov,__zero_reg__,%C1) CR_TAB
+-                                AS2 (mov,__tmp_reg__,%D1)  CR_TAB
+-                                AS2 (st,%0+,%A1)           CR_TAB
+-                                AS2 (st,%0+,%B1)           CR_TAB
+-                                AS2 (st,%0+,__zero_reg__)  CR_TAB
+-                                AS2 (st,%0,__tmp_reg__)    CR_TAB
+-                                AS1 (clr,__zero_reg__)     CR_TAB
+-			                    AS2 (subi,r26,lo8(3))      CR_TAB
+-			                    AS2 (sbci,r27,hi8(3)))
+-					             : (AS2 (mov,__zero_reg__,%C1) CR_TAB
+-                              AS2 (mov,__tmp_reg__,%D1) CR_TAB
+-                              AS2 (st,%0+,%A1) CR_TAB
+-                              AS2 (st,%0+,%B1) CR_TAB
+-                              AS2 (st,%0+,__zero_reg__)  CR_TAB
+-                              AS2 (st,%0,__tmp_reg__)   CR_TAB
+-                              AS1 (clr,__zero_reg__)     CR_TAB
+-                              AS2 (sbiw,r26,3));
++              else {
++                if (AVR_TINY) {
++                  *l = 9;
++                  return (AS2 (mov,__zero_reg__,%C1) CR_TAB
++                          AS2 (mov,__tmp_reg__,%D1)  CR_TAB
++                          AS2 (st,%0+,%A1)           CR_TAB
++                          AS2 (st,%0+,%B1)           CR_TAB
++                          AS2 (st,%0+,__zero_reg__)  CR_TAB
++                          AS2 (st,%0,__tmp_reg__)    CR_TAB
++                          AS1 (clr,__zero_reg__)     CR_TAB
++                          AS2 (subi,r26,lo8(3))      CR_TAB
++                          AS2 (sbci,r27,hi8(3)));
++                } else {
++                  *l = 8;
++                  return (AS2 (mov,__zero_reg__,%C1) CR_TAB
++                          AS2 (mov,__tmp_reg__,%D1) CR_TAB
++                          AS2 (st,%0+,%A1) CR_TAB
++                          AS2 (st,%0+,%B1) CR_TAB
++                          AS2 (st,%0+,__zero_reg__) CR_TAB
++                          AS2 (st,%0,__tmp_reg__)   CR_TAB
++                          AS1 (clr,__zero_reg__)    CR_TAB
++                          AS2 (sbiw,r26,3));
++                }
++              }
+             }
+-          return *l=5, AVR_TINY ? (AS2 (st,%0+,%A1)  CR_TAB
+-                          AS2 (st,%0+,%B1)  CR_TAB
+-                          AS2 (st,%0+,%C1)  CR_TAB
+-                          AS2 (st,%0,%D1)   CR_TAB
+-			              AS2 (subi,r26,lo8(3))      CR_TAB
+-			              AS2 (sbci,r27,hi8(3)))
+-				           : (AS2 (st,%0+,%A1)  CR_TAB
+-                        AS2 (st,%0+,%B1) CR_TAB
+-                        AS2 (st,%0+,%C1) CR_TAB
+-                        AS2 (st,%0,%D1)  CR_TAB
+-                        AS2 (sbiw,r26,3));
++          if (AVR_TINY) {
++            *l = 6;
++            return (AS2 (st,%0+,%A1)  CR_TAB
++                    AS2 (st,%0+,%B1)  CR_TAB
++                    AS2 (st,%0+,%C1)  CR_TAB
++                    AS2 (st,%0,%D1)   CR_TAB
++                    AS2 (subi,r26,lo8(3)) CR_TAB
++                    AS2 (sbci,r27,hi8(3)));
++          } else {
++            *l = 5;
++            return (AS2 (st,%0+,%A1) CR_TAB
++                    AS2 (st,%0+,%B1) CR_TAB
++                    AS2 (st,%0+,%C1) CR_TAB
++                    AS2 (st,%0,%D1)  CR_TAB
++                    AS2 (sbiw,r26,3));
++          }
+         }
+       else
+ 	 {
+-		 if(reg_base == REG_Y)
+-        return *l=4, AVR_TINY ? (AS2 (st,Y+,%A1)        CR_TAB
+-		                AS2 (st,Y+,%B1)        CR_TAB
+-		                AS2 (st,Y+,%C1)        CR_TAB
+-		                AS2 (st,Y,%D1)        CR_TAB
+-				        AS2 (subi,r28,lo8(3)) CR_TAB
+-				        AS2 (sbci,r29,lo8(3)))
+-			             : (AS2 (st,%0,%A1)    CR_TAB
+-		                AS2 (std,%0+1,%B1) CR_TAB
+-		                AS2 (std,%0+2,%C1) CR_TAB
+-		                AS2 (std,%0+3,%D1));
+-		 if(reg_base == REG_Z)
+-        return *l=4, AVR_TINY ? (AS2 (st,Z+,%A1)        CR_TAB
+-		                AS2 (st,Z+,%B1)        CR_TAB
+-		                AS2 (st,Z+,%C1)        CR_TAB
+-		                AS2 (st,Z,%D1)        CR_TAB
+-				        AS2 (subi,r30,lo8(3)) CR_TAB
+-				        AS2 (sbci,r31,lo8(3)))
+-			             : (AS2 (st,%0,%A1)    CR_TAB
+-		      AS2 (std,%0+1,%B1) CR_TAB
+-		      AS2 (std,%0+2,%C1) CR_TAB
+-		      AS2 (std,%0+3,%D1));
++        if(reg_base == REG_Y) {
++          if (AVR_TINY) {
++            *l = 6;
++            return (AS2 (st,Y+,%A1)       CR_TAB
++                    AS2 (st,Y+,%B1)       CR_TAB
++                    AS2 (st,Y+,%C1)       CR_TAB
++                    AS2 (st,Y,%D1)        CR_TAB
++                    AS2 (subi,r28,lo8(3)) CR_TAB
++                    AS2 (sbci,r29,lo8(3)));
++          } else {
++            *l = 4;
++            return (AS2 (st,%0,%A1)    CR_TAB
++                    AS2 (std,%0+1,%B1) CR_TAB
++                    AS2 (std,%0+2,%C1) CR_TAB
++                    AS2 (std,%0+3,%D1));
++          }
++        }
++        if(reg_base == REG_Z) {
++          if (AVR_TINY) {
++            *l = 6;
++            return (AS2 (st,Z+,%A1)       CR_TAB
++                    AS2 (st,Z+,%B1)       CR_TAB
++                    AS2 (st,Z+,%C1)       CR_TAB
++                    AS2 (st,Z,%D1)        CR_TAB
++                    AS2 (subi,r30,lo8(3)) CR_TAB
++                    AS2 (sbci,r31,lo8(3)));
++          } else {
++            *l = 4;
++            return (AS2 (st,%0,%A1)    CR_TAB
++                    AS2 (std,%0+1,%B1) CR_TAB
++                    AS2 (std,%0+2,%C1) CR_TAB
++                    AS2 (std,%0+3,%D1));
++          }
++        }
+     }
+     }
+   else if (GET_CODE (base) == PLUS) /* (R + i) */
+@@ -3024,62 +3286,76 @@ out_movsi_mr_r (rtx insn, rtx op[], int 
+ 	  if (reg_base != REG_Y)
+ 	    fatal_insn ("incorrect insn:",insn);
+ 
+-	  if (disp <= 63 + MAX_LD_OFFSET (GET_MODE (dest)))
+-	    return *l = 6, AVR_TINY ? (AS2 (subi,r28,lo8(-(%o0-60))) CR_TAB
+-				          AS2 (sbci,r29,hi8(-(%o0-60))) CR_TAB
+-				          AS2 (subi,r28,lo8(-60)) CR_TAB
+-				          AS2 (sbci,r29,lo8(-60)) CR_TAB
+-			              AS2 (st,Y+,%A1)          CR_TAB
+-			              AS2 (st,Y+,%B1)          CR_TAB
+-			              AS2 (st,Y+,%C1)          CR_TAB
+-			              AS2 (st,Y,%D1)          CR_TAB
+-				          AS2 (subi,r28,lo8(63)) CR_TAB
+-				          AS2 (sbci,r29,lo8(63)) CR_TAB
+-			              AS2 (subi,r28,lo8(%o0-60)) CR_TAB 
+-			              AS2 (sbci,r29,hi8(%o0-60)))  
+-			               : (AS2 (adiw,r28,%o0-60) CR_TAB
+-			    AS2 (std,Y+60,%A1)    CR_TAB
+-			    AS2 (std,Y+61,%B1)    CR_TAB
+-			    AS2 (std,Y+62,%C1)    CR_TAB
+-			    AS2 (std,Y+63,%D1)    CR_TAB
+-			    AS2 (sbiw,r28,%o0-60));
+-	  return *l = 8, AVR_TINY ? (AS2 (subi,r28,lo8(-%o0)) CR_TAB
+-			            AS2 (sbci,r29,hi8(-%o0)) CR_TAB
+-			            AS2 (st,Y+,%A1)           CR_TAB
+-			            AS2 (st,Y+,%B1)           CR_TAB
+-			            AS2 (st,Y+,%C1)           CR_TAB
+-			            AS2 (st,Y,%D1)           CR_TAB
+-				        AS2 (subi,r28,lo8(3))   CR_TAB
+-				        AS2 (sbci,r29,lo8(3))   CR_TAB
+-			            AS2 (subi,r28,lo8(%o0))  CR_TAB
+-			            AS2 (sbci,r29,hi8(%o0)))
+-			             : (AS2 (subi,r28,lo8(-%o0)) CR_TAB
+-			  AS2 (sbci,r29,hi8(-%o0)) CR_TAB
+-			  AS2 (st,Y,%A1)           CR_TAB
+-			  AS2 (std,Y+1,%B1)        CR_TAB
+-			  AS2 (std,Y+2,%C1)        CR_TAB
+-			  AS2 (std,Y+3,%D1)        CR_TAB
+-			  AS2 (subi,r28,lo8(%o0))  CR_TAB
+-			  AS2 (sbci,r29,hi8(%o0)));
++	  if (disp <= 63 + MAX_LD_OFFSET (GET_MODE (dest))) {
++	    if (AVR_TINY) {
++              *l = 12;
++              return (AS2 (subi,r28,lo8(-(%o0-60))) CR_TAB
++                      AS2 (sbci,r29,hi8(-(%o0-60))) CR_TAB
++                      AS2 (subi,r28,lo8(-60)) CR_TAB
++                      AS2 (sbci,r29,lo8(-60)) CR_TAB
++                      AS2 (st,Y+,%A1)         CR_TAB
++                      AS2 (st,Y+,%B1)         CR_TAB
++                      AS2 (st,Y+,%C1)         CR_TAB
++                      AS2 (st,Y,%D1)          CR_TAB
++                      AS2 (subi,r28,lo8(63)) CR_TAB
++                      AS2 (sbci,r29,lo8(63)) CR_TAB
++                      AS2 (subi,r28,lo8(%o0-60)) CR_TAB 
++                      AS2 (sbci,r29,hi8(%o0-60)));
++            } else {
++              *l = 6;
++              return (AS2 (adiw,r28,%o0-60) CR_TAB
++                      AS2 (std,Y+60,%A1)    CR_TAB
++                      AS2 (std,Y+61,%B1)    CR_TAB
++                      AS2 (std,Y+62,%C1)    CR_TAB
++                      AS2 (std,Y+63,%D1)    CR_TAB
++                      AS2 (sbiw,r28,%o0-60));
++            }
++          }
++          if (AVR_TINY) {
++            *l = 10;
++            return (AS2 (subi,r28,lo8(-%o0)) CR_TAB
++	            AS2 (sbci,r29,hi8(-%o0)) CR_TAB
++	            AS2 (st,Y+,%A1)           CR_TAB
++	            AS2 (st,Y+,%B1)           CR_TAB
++	            AS2 (st,Y+,%C1)           CR_TAB
++	            AS2 (st,Y,%D1)           CR_TAB
++                    AS2 (subi,r28,lo8(3))   CR_TAB
++                    AS2 (sbci,r29,lo8(3))   CR_TAB
++	            AS2 (subi,r28,lo8(%o0))  CR_TAB
++	            AS2 (sbci,r29,hi8(%o0)));
++          } else {
++            *l = 8;
++            return (AS2 (subi,r28,lo8(-%o0)) CR_TAB
++                    AS2 (sbci,r29,hi8(-%o0)) CR_TAB
++		    AS2 (st,Y,%A1)           CR_TAB
++		    AS2 (std,Y+1,%B1)        CR_TAB
++		    AS2 (std,Y+2,%C1)        CR_TAB
++		    AS2 (std,Y+3,%D1)        CR_TAB
++		    AS2 (subi,r28,lo8(%o0))  CR_TAB
++		    AS2 (sbci,r29,hi8(%o0)));
++          }
+ 	}
+       if (reg_base == REG_X)
+ 	{
+ 	  /* (X + d) = R */
+ 	  if (reg_src == REG_X)
+-	    {
+-	      *l = 9;
+-	      return AVR_TINY ? (AS2 (mov,__tmp_reg__,r26)  CR_TAB
+-		            AS2 (mov,__zero_reg__,r27) CR_TAB
+-	                AS2 (subi,r26,lo8(-(%o0))) CR_TAB
+-			        AS2 (sbci,r27,hi8(-(%o0))) CR_TAB
+-		            AS2 (st,X+,__tmp_reg__)    CR_TAB
+-		            AS2 (st,X+,__zero_reg__)   CR_TAB
+-		            AS2 (st,X+,r28)            CR_TAB
+-		            AS2 (st,X,r29)             CR_TAB
+-		            AS1 (clr,__zero_reg__)     CR_TAB
+-					AS2 (subi,r26,lo8(%o0+3))  CR_TAB
+-		            AS2 (sbci,r27,hi8(%o0+3)))
+-			         : (AS2 (mov,__tmp_reg__,r26)  CR_TAB
++	  {
++            if (AVR_TINY) {
++              *l = 11;
++              return (AS2 (mov,__tmp_reg__,r26)  CR_TAB
++		      AS2 (mov,__zero_reg__,r27) CR_TAB
++	              AS2 (subi,r26,lo8(-(%o0))) CR_TAB
++		      AS2 (sbci,r27,hi8(-(%o0))) CR_TAB
++		      AS2 (st,X+,__tmp_reg__)    CR_TAB
++		      AS2 (st,X+,__zero_reg__)   CR_TAB
++		      AS2 (st,X+,r28)            CR_TAB
++		      AS2 (st,X,r29)             CR_TAB
++		      AS1 (clr,__zero_reg__)     CR_TAB
++	              AS2 (subi,r26,lo8(%o0+3))  CR_TAB
++		      AS2 (sbci,r27,hi8(%o0+3)));
++            } else {
++              *l = 9;
++              return (AS2 (mov,__tmp_reg__,r26)  CR_TAB
+ 		      AS2 (mov,__zero_reg__,r27) CR_TAB
+ 		      AS2 (adiw,r26,%o0)         CR_TAB
+ 		      AS2 (st,X+,__tmp_reg__)    CR_TAB
+@@ -3088,22 +3364,26 @@ out_movsi_mr_r (rtx insn, rtx op[], int 
+ 		      AS2 (st,X,r29)             CR_TAB
+ 		      AS1 (clr,__zero_reg__)     CR_TAB
+ 		      AS2 (sbiw,r26,%o0+3));
+-	    }
++            }
++	  }
+ 	  else if (reg_src == REG_X - 2)
+-	    {
+-	      *l = 9;
+-	      return AVR_TINY ? (AS2 (mov,__tmp_reg__,r26)  CR_TAB
+-		            AS2 (mov,__zero_reg__,r27) CR_TAB
+-	                AS2 (subi,r26,lo8(-(%o0))) CR_TAB
+-			        AS2 (sbci,r27,hi8(-(%o0))) CR_TAB
+-		            AS2 (st,X+,r24)            CR_TAB
+-		            AS2 (st,X+,r25)            CR_TAB
+-		            AS2 (st,X+,__tmp_reg__)    CR_TAB
+-		            AS2 (st,X,__zero_reg__)    CR_TAB
+-		            AS1 (clr,__zero_reg__)     CR_TAB
+-					AS2 (subi,r26,lo8(%o0+3)) CR_TAB
+-		            AS2 (sbci,r27,hi8(%o0+3)))
+-			         : (AS2 (mov,__tmp_reg__,r26)  CR_TAB
++	  {
++            if (AVR_TINY) {
++	      *l = 11;
++	      return (AS2 (mov,__tmp_reg__,r26)  CR_TAB
++		      AS2 (mov,__zero_reg__,r27) CR_TAB
++	              AS2 (subi,r26,lo8(-(%o0))) CR_TAB
++		      AS2 (sbci,r27,hi8(-(%o0))) CR_TAB
++		      AS2 (st,X+,r24)            CR_TAB
++		      AS2 (st,X+,r25)            CR_TAB
++		      AS2 (st,X+,__tmp_reg__)    CR_TAB
++		      AS2 (st,X,__zero_reg__)    CR_TAB
++		      AS1 (clr,__zero_reg__)     CR_TAB
++		      AS2 (subi,r26,lo8(%o0+3)) CR_TAB
++		      AS2 (sbci,r27,hi8(%o0+3)));
++            } else {
++              *l = 9;
++              return (AS2 (mov,__tmp_reg__,r26)  CR_TAB
+ 		      AS2 (mov,__zero_reg__,r27) CR_TAB
+ 		      AS2 (adiw,r26,%o0)         CR_TAB
+ 		      AS2 (st,X+,r24)            CR_TAB
+@@ -3112,51 +3392,71 @@ out_movsi_mr_r (rtx insn, rtx op[], int 
+ 		      AS2 (st,X,__zero_reg__)    CR_TAB
+ 		      AS1 (clr,__zero_reg__)     CR_TAB
+ 		      AS2 (sbiw,r26,%o0+3));
+-	    }
+-	  *l = 6;
+-	  return AVR_TINY ? (AS2 (subi,r26,lo8(-(%o0))) CR_TAB
+-			    AS2 (sbci,r27,hi8(-(%o0))) CR_TAB
+-		        AS2 (st,X+,%A1)    CR_TAB
+-		        AS2 (st,X+,%B1)    CR_TAB
+-		        AS2 (st,X+,%C1)    CR_TAB
+-		        AS2 (st,X,%D1)     CR_TAB
+-				AS2 (subi,r26,lo8(%o0+3)) CR_TAB
+-		        AS2 (sbci,r27,hi8(%o0+3)))
+-		         : (AS2 (adiw,r26,%o0) CR_TAB
+-		  AS2 (st,X+,%A1)    CR_TAB
+-		  AS2 (st,X+,%B1)    CR_TAB
+-		  AS2 (st,X+,%C1)    CR_TAB
+-		  AS2 (st,X,%D1)     CR_TAB
+-		  AS2 (sbiw,r26,%o0+3));
+-	}
+-		op[2] = XEXP(base, 0);
+-		if(REGNO(op[2]) == REG_Y)
+-      return *l=4, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o0)))    CR_TAB
+-					  AS2 (sbci,%B2,hi8(-(%o0)))    CR_TAB
+-		              AS2 (st,Y+,%A1)               CR_TAB
+-		              AS2 (st,Y+,%B1)               CR_TAB
+-		              AS2 (st,Y+,%C1)               CR_TAB
+-		              AS2 (st,Y,%D1)                CR_TAB
+-					  AS2 (subi,%A2,lo8(%o0+3))     CR_TAB
+-					  AS2 (sbci,%B2,hi8(%o0+3)))
+-		               : (AS2 (std,%A0,%A1)    CR_TAB
+-		              AS2 (std,%B0,%B1)    CR_TAB
+-		              AS2 (std,%C0,%C1)    CR_TAB
+-		              AS2 (std,%D0,%D1));
+-
+-		if(REGNO(op[2]) == REG_Z)
+-      return *l=4, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o0)))    CR_TAB
+-					  AS2 (sbci,%B2,hi8(-(%o0)))    CR_TAB
+-		              AS2 (st,Z+,%A1)              CR_TAB
+-		              AS2 (st,Z+,%B1)             CR_TAB
+-		              AS2 (st,Z+,%C1)             CR_TAB
+-		              AS2 (st,Z,%D1)              CR_TAB
+-					  AS2 (subi,%A2,lo8(%o0+3))    CR_TAB
+-					  AS2 (sbci,%B2,hi8(%o0+3)))
+-		               : (AS2 (std,%A0,%A1)    CR_TAB
+-		    AS2 (std,%B0,%B1) CR_TAB
+-		    AS2 (std,%C0,%C1) CR_TAB
+-		    AS2 (std,%D0,%D1));
++            }
++	  }
++
++          if (AVR_TINY) {
++            *l = 8;
++            return (AS2 (subi,r26,lo8(-(%o0))) CR_TAB
++		    AS2 (sbci,r27,hi8(-(%o0))) CR_TAB
++		    AS2 (st,X+,%A1)    CR_TAB
++		    AS2 (st,X+,%B1)    CR_TAB
++		    AS2 (st,X+,%C1)    CR_TAB
++		    AS2 (st,X,%D1)     CR_TAB
++		    AS2 (subi,r26,lo8(%o0+3)) CR_TAB
++		    AS2 (sbci,r27,hi8(%o0+3)));
++          } else {
++            *l = 6;
++            return (AS2 (adiw,r26,%o0) CR_TAB
++		    AS2 (st,X+,%A1)    CR_TAB
++		    AS2 (st,X+,%B1)    CR_TAB
++		    AS2 (st,X+,%C1)    CR_TAB
++		    AS2 (st,X,%D1)     CR_TAB
++		    AS2 (sbiw,r26,%o0+3));
++          }
++	}
++        op[2] = XEXP(base, 0);
++        if(REGNO(op[2]) == REG_Y)
++        {
++          if (AVR_TINY) {
++            *l = 8;
++            return (AS2 (subi,%A2,lo8(-(%o0)))    CR_TAB
++                    AS2 (sbci,%B2,hi8(-(%o0)))    CR_TAB
++		    AS2 (st,Y+,%A1)               CR_TAB
++		    AS2 (st,Y+,%B1)               CR_TAB
++		    AS2 (st,Y+,%C1)               CR_TAB
++		    AS2 (st,Y,%D1)                CR_TAB
++		    AS2 (subi,%A2,lo8(%o0+3))     CR_TAB
++		    AS2 (sbci,%B2,hi8(%o0+3)));
++	  } else {
++            *l = 4;
++            return (AS2 (std,%A0,%A1)    CR_TAB
++		    AS2 (std,%B0,%B1)    CR_TAB
++		    AS2 (std,%C0,%C1)    CR_TAB
++       		    AS2 (std,%D0,%D1));
++          }
++        }
++
++	if(REGNO(op[2]) == REG_Z)
++        {
++          if (AVR_TINY) {
++            *l = 8;
++            return (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
++		    AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
++		    AS2 (st,Z+,%A1)            CR_TAB
++		    AS2 (st,Z+,%B1)            CR_TAB
++		    AS2 (st,Z+,%C1)            CR_TAB
++		    AS2 (st,Z,%D1)             CR_TAB
++		    AS2 (subi,%A2,lo8(%o0+3))  CR_TAB
++		    AS2 (sbci,%B2,hi8(%o0+3)));
++         } else {
++           *l = 4;
++           return (AS2 (std,%A0,%A1) CR_TAB
++		   AS2 (std,%B0,%B1) CR_TAB
++		   AS2 (std,%C0,%C1) CR_TAB
++		   AS2 (std,%D0,%D1));
++         }
++       }
+     }
+   else if (GET_CODE (base) == PRE_DEC) /* (--R) */
+     return *l=4, (AS2 (st,%0,%D1) CR_TAB
+@@ -3370,18 +3670,25 @@ out_movqi_mr_r (rtx insn, rtx op[], int 
+ 	    fatal_insn ("incorrect insn:",insn);
+ 
+ 	  if (disp <= 63 + MAX_LD_OFFSET (GET_MODE (dest)))
+-	    return *l = 3, AVR_TINY ? (AS2 (subi,r28,lo8(-(%o0-63))) CR_TAB
+-				          AS2 (sbci,r29,hi8(-(%o0-63))) CR_TAB
+-						  AS2 (subi,r28,lo8(-63)) CR_TAB
+-						  AS2 (sbci,r29,hi8(-63)) CR_TAB
+-			              AS2 (st,Y,%1)           CR_TAB
+-						  AS2 (subi,r28,lo8(63)) CR_TAB
+-						  AS2 (sbci,r29,hi8(63)) CR_TAB
+-				          AS2 (subi,r28,lo8(%o0-63)) CR_TAB
+-			              AS2 (sbci,r29,hi8(%o0-63)))
+-			               : (AS2 (adiw,r28,%o0-63) CR_TAB
+-			    AS2 (std,Y+63,%1)     CR_TAB
+-			    AS2 (sbiw,r28,%o0-63));
++          {
++	    if (AVR_TINY) {
++              *l = 9;
++              return (AS2 (subi,r28,lo8(-(%o0-63))) CR_TAB
++		      AS2 (sbci,r29,hi8(-(%o0-63))) CR_TAB
++		      AS2 (subi,r28,lo8(-63)) CR_TAB
++		      AS2 (sbci,r29,hi8(-63)) CR_TAB
++		      AS2 (st,Y,%1)           CR_TAB
++		      AS2 (subi,r28,lo8(63)) CR_TAB
++		      AS2 (sbci,r29,hi8(63)) CR_TAB
++		      AS2 (subi,r28,lo8(%o0-63)) CR_TAB
++		      AS2 (sbci,r29,hi8(%o0-63)));
++            } else {
++	      *l = 3;
++              return (AS2 (adiw,r28,%o0-63) CR_TAB
++		      AS2 (std,Y+63,%1)     CR_TAB
++		      AS2 (sbiw,r28,%o0-63));
++            }
++          }
+ 
+ 	  return *l = 5, (AS2 (subi,r28,lo8(-%o0)) CR_TAB
+ 			  AS2 (sbci,r29,hi8(-%o0)) CR_TAB
+@@ -3394,60 +3701,95 @@ out_movqi_mr_r (rtx insn, rtx op[], int 
+ 	  if (reg_overlap_mentioned_p (src, XEXP (x, 0)))
+ 	    {
+ 	      if (reg_unused_after (insn, XEXP (x,0)))
+-		return *l = 3, AVR_TINY ? (AS2 (mov,__tmp_reg__,%1) CR_TAB
+-			              AS2 (subi,r26,lo8(-(%o0)))       CR_TAB
+-			              AS2 (sbci,r27,hi8(-(%o0)))       CR_TAB
+-				          AS2 (st,X,__tmp_reg__))
+-			               : (AS2 (mov,__tmp_reg__,%1) CR_TAB
+-				AS2 (adiw,r26,%o0)       CR_TAB
+-				AS2 (st,X,__tmp_reg__));
+-
+-	      return *l = 4, AVR_TINY ? (AS2 (mov,__tmp_reg__,%1) CR_TAB
+-			                AS2 (subi,r26,lo8(-(%o0)))       CR_TAB
+-			                AS2 (sbci,r27,hi8(-(%o0)))       CR_TAB
+-			                AS2 (st,X,__tmp_reg__)   CR_TAB
+-			                AS2 (subi,r26,lo8(%o0))       CR_TAB
+-			                AS2 (sbci,r27,hi8(%o0)))
+-				             : (AS2 (mov,__tmp_reg__,%1) CR_TAB
+-			      AS2 (adiw,r26,%o0)       CR_TAB
+-			      AS2 (st,X,__tmp_reg__)   CR_TAB
+-			      AS2 (sbiw,r26,%o0));
++              {
++                if (AVR_TINY) {
++                  *l = 4;
++                  return (AS2 (mov,__tmp_reg__,%1) CR_TAB
++			  AS2 (subi,r26,lo8(-(%o0)))       CR_TAB
++			  AS2 (sbci,r27,hi8(-(%o0)))       CR_TAB
++			  AS2 (st,X,__tmp_reg__));
++                } else {
++                  *l = 3;
++                  return (AS2 (mov,__tmp_reg__,%1) CR_TAB
++                          AS2 (adiw,r26,%o0)       CR_TAB
++                       	  AS2 (st,X,__tmp_reg__));
++                }
++              }
++
++	      if (AVR_TINY) {
++                *l = 6;
++                 return (AS2 (mov,__tmp_reg__,%1)   CR_TAB
++			 AS2 (subi,r26,lo8(-(%o0))) CR_TAB
++			 AS2 (sbci,r27,hi8(-(%o0))) CR_TAB
++			 AS2 (st,X,__tmp_reg__)     CR_TAB
++			 AS2 (subi,r26,lo8(%o0))    CR_TAB
++			 AS2 (sbci,r27,hi8(%o0)));
++              } else {
++                *l = 4;
++                return (AS2 (mov,__tmp_reg__,%1) CR_TAB
++                        AS2 (adiw,r26,%o0)       CR_TAB
++                        AS2 (st,X,__tmp_reg__)   CR_TAB
++                        AS2 (sbiw,r26,%o0));
++              }
+ 	    }
+ 	  else
+-	    {
+-	      if (reg_unused_after (insn, XEXP (x,0)))
+-		return *l = 2, AVR_TINY ? (AS2 (subi,r26,lo8(-(%o0)))       CR_TAB
+-			              AS2 (sbci,r27,hi8(-(%o0)))       CR_TAB
+-				          AS2 (st,X,%1))
+-			               : (AS2 (adiw,r26,%o0) CR_TAB
+-				AS2 (st,X,%1));
+-
+-	      return *l = 3, AVR_TINY ? (AS2 (subi,r26,lo8(-(%o0)))       CR_TAB
+-			                AS2 (sbci,r27,hi8(-(%o0)))       CR_TAB
+-			                AS2 (st,X,%1)                    CR_TAB
+-			                AS2 (subi,r26,lo8(%o0))          CR_TAB
+-			                AS2 (sbci,r27,hi8(%o0)))
+-							 : (AS2 (adiw,r26,%o0) CR_TAB
+-			      AS2 (st,X,%1)      CR_TAB
+-			      AS2 (sbiw,r26,%o0));
+-	    }
++	  {
++	    if (reg_unused_after (insn, XEXP (x,0))) {
++              if (AVR_TINY) {
++                 *l = 3;
++                 return (AS2 (subi,r26,lo8(-(%o0))) CR_TAB
++                         AS2 (sbci,r27,hi8(-(%o0))) CR_TAB
++		         AS2 (st,X,%1));
++              } else {
++                *l = 2;
++                return (AS2 (adiw,r26,%o0) CR_TAB
++		        AS2 (st,X,%1));
++              }
++            }
++
++            if (AVR_TINY) {
++              *l = 5;
++              return (AS2 (subi,r26,lo8(-(%o0)))       CR_TAB
++                      AS2 (sbci,r27,hi8(-(%o0)))       CR_TAB
++                      AS2 (st,X,%1)                    CR_TAB
++                      AS2 (subi,r26,lo8(%o0))          CR_TAB
++                      AS2 (sbci,r27,hi8(%o0)));
++            } else {
++              *l = 3;
++              return (AS2 (adiw,r26,%o0) CR_TAB
++                      AS2 (st,X,%1)      CR_TAB
++                      AS2 (sbiw,r26,%o0));
++            }
++	  }
+ 	}
+-      *l = 1;
+-	  op[2] = XEXP(x, 0);
+-	  if(REGNO(op[2]) == REG_Y)
+-      return AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
+-				AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
+-		        AS2 (st,Y,%1)              CR_TAB
+-                AS2 (subi,%A2,lo8(%o0)) CR_TAB
+-				AS2 (sbci,%B2,hi8(%o0)))
+-		         :  AS2 (std,%0,%1);
+-	  if(REGNO(op[2]) == REG_Z)
+-      return AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
+-				AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
+-		        AS2 (st,Z,%1)              CR_TAB
+-                AS2 (subi,%A2,lo8(%o0)) CR_TAB
+-				AS2 (sbci,%B2,hi8(%o0)))
+-		         :  AS2 (std,%0,%1);
++
++        op[2] = XEXP(x, 0);
++        if(REGNO(op[2]) == REG_Y) {
++          if (AVR_TINY) {
++            *l = 5;
++            return (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
++		    AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
++		    AS2 (st,Y,%1)              CR_TAB
++                    AS2 (subi,%A2,lo8(%o0)) CR_TAB
++		    AS2 (sbci,%B2,hi8(%o0)));
++          } else {
++            *l = 1;
++            return (AS2 (std,%0,%1));
++          }
++        }
++        if(REGNO(op[2]) == REG_Z) {
++          if (AVR_TINY) {
++            *l = 5;
++            return (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
++    	            AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
++                    AS2 (st,Z,%1)              CR_TAB
++                    AS2 (subi,%A2,lo8(%o0)) CR_TAB
++                    AS2 (sbci,%B2,hi8(%o0)));
++          } else {
++	    *l = 1;
++            return (AS2 (std,%0,%1));
++          }
++        }
+     }
+   *l = 1;
+   return AS2 (st,%0,%1);
+@@ -3493,109 +3835,162 @@ out_movhi_mr_r (rtx insn, rtx op[], int 
+       if (reg_base == REG_X)
+         {
+           if (reg_src == REG_X)
+-            {
+-              /* "st X+,r26" and "st -X,r26" are undefined.  */
+-              if (!mem_volatile_p && reg_unused_after (insn, src))
+-		return *l=4, AVR_TINY ? (AS2 (mov,__tmp_reg__,r27)  CR_TAB
+-			            AS2 (st,X,r26)             CR_TAB
+-			            AS2 (subi,r26,lo8(-1))     CR_TAB
+-			            AS2 (sbci,r27,hi8(-1))     CR_TAB
+-			            AS2 (st,X,__tmp_reg__))
+-			             : (AS2 (mov,__tmp_reg__,r27)  CR_TAB
+-			      AS2 (st,X,r26)            CR_TAB
+-			      AS2 (adiw,r26,1)          CR_TAB
+-			      AS2 (st,X,__tmp_reg__));
+-              else
+-	        {
+-                  if (!AVR_XMEGA)
+-		    return *l=5, AVR_TINY ? (AS2 (mov,__tmp_reg__,r27) CR_TAB
+-							AS2 (subi,r26,lo8(-1))    CR_TAB
+-							AS2 (sbci,r27,hi8(-1))    CR_TAB
+-							AS2 (st,X,__tmp_reg__)    CR_TAB
+-							AS2 (subi,r26,lo8(1))     CR_TAB
+-							AS2 (sbci,r27,hi8(1))     CR_TAB
+-							AS2 (st,X,r26))
+-							 : (AS2 (mov,__tmp_reg__,r27) CR_TAB
+-			      AS2 (adiw,r26,1)          CR_TAB
+-			      AS2 (st,X,__tmp_reg__)    CR_TAB
+-                              AS2 (sbiw,r26,1)          CR_TAB
+-                              AS2 (st,X,r26));
+-		  else
+- 		    return *l=5, AVR_TINY ? (AS2 (mov,__tmp_reg__,r27) CR_TAB
+-			                AS2 (st,X,r26)            CR_TAB
+-						    AS2 (subi,r26,lo8(-1))    CR_TAB
+-						    AS2 (sbci,r27,hi8(-1))    CR_TAB
+- 			                AS2 (st,X,__tmp_reg__)    CR_TAB
+-						    AS2 (subi,r26,lo8(1))     CR_TAB
+-						    AS2 (sbci,r27,hi8(1)))
+-				             : (AS2 (mov,__tmp_reg__,r27) CR_TAB
+-			          AS2 (st,X,r26)            CR_TAB
+- 			          AS2 (adiw,r26,1)          CR_TAB
+- 			          AS2 (st,X,__tmp_reg__)    CR_TAB
+-			          AS2 (sbiw,r26,1));
+-		}
++          {
++            /* "st X+,r26" and "st -X,r26" are undefined.  */
++            if (!mem_volatile_p && reg_unused_after (insn, src)) {
++              if (AVR_TINY) {
++                *l = 5;
++                return  (AS2 (mov,__tmp_reg__,r27)  CR_TAB
++                         AS2 (st,X,r26)             CR_TAB
++                         AS2 (subi,r26,lo8(-1))     CR_TAB
++                         AS2 (sbci,r27,hi8(-1))     CR_TAB
++                         AS2 (st,X,__tmp_reg__));
++              } else {
++                *l = 4;
++                return (AS2 (mov,__tmp_reg__,r27)  CR_TAB
++                        AS2 (st,X,r26)            CR_TAB
++                        AS2 (adiw,r26,1)          CR_TAB
++                        AS2 (st,X,__tmp_reg__));
++              }
++            }
++            else
++	    {
++              if (!AVR_XMEGA) {
++                if (AVR_TINY) {
++                  *l = 7;
++                  return (AS2 (mov,__tmp_reg__,r27) CR_TAB
++                          AS2 (subi,r26,lo8(-1))    CR_TAB
++                          AS2 (sbci,r27,hi8(-1))    CR_TAB
++                          AS2 (st,X,__tmp_reg__)    CR_TAB
++                          AS2 (subi,r26,lo8(1))     CR_TAB
++                          AS2 (sbci,r27,hi8(1))     CR_TAB
++                          AS2 (st,X,r26));
++                } else {
++                  *l = 5;
++                  return (AS2 (mov,__tmp_reg__,r27) CR_TAB
++                          AS2 (adiw,r26,1)          CR_TAB
++                          AS2 (st,X,__tmp_reg__)    CR_TAB
++                          AS2 (sbiw,r26,1)          CR_TAB
++                          AS2 (st,X,r26));
++                }
++              }
++              else {
++                if (AVR_TINY) {
++                  *l = 7;
++                  return (AS2 (mov,__tmp_reg__,r27) CR_TAB
++			  AS2 (st,X,r26)            CR_TAB
++			  AS2 (subi,r26,lo8(-1))    CR_TAB
++			  AS2 (sbci,r27,hi8(-1))    CR_TAB
++ 			  AS2 (st,X,__tmp_reg__)    CR_TAB
++			  AS2 (subi,r26,lo8(1))     CR_TAB
++			  AS2 (sbci,r27,hi8(1)));
++                } else {
++                  *l = 5;
++                  return (AS2 (mov,__tmp_reg__,r27) CR_TAB
++			  AS2 (st,X,r26)            CR_TAB
++ 			  AS2 (adiw,r26,1)          CR_TAB
++ 			  AS2 (st,X,__tmp_reg__)    CR_TAB
++			  AS2 (sbiw,r26,1));
++                }
++              }
+             }
++          }
+           else
+             {
+               if (!mem_volatile_p && reg_unused_after (insn, base))
+                 return *l=2, (AS2 (st,X+,%A1) CR_TAB
+                               AS2 (st,X,%B1));
+               else
+-		{
+-                  if (!AVR_XMEGA)
+-                    return *l=3, AVR_TINY ? (AS2 (subi,r26,lo8(-1)) CR_TAB
+-							        AS2 (sbci,r27,hi8(-1)) CR_TAB
+-                                    AS2 (st,X,%B1)         CR_TAB
+-                                    AS2 (st,-X,%A1))
+-						             : (AS2 (adiw,r26,1) CR_TAB
+-                              AS2 (st,X,%B1)   CR_TAB
+-                              AS2 (st,-X,%A1));
+-	          else
+-                    return *l=3, AVR_TINY ? (AS2 (st,X+,%A1) CR_TAB
+-                                    AS2 (st,X,%B1) CR_TAB
+-						            AS2 (subi,r26,lo8(1))     CR_TAB
+-						            AS2 (sbci,r27,hi8(1)))
+-						             : (AS2 (st,X+,%A1) CR_TAB
+-                                  AS2 (st,X,%B1) CR_TAB
+-                                  AS2 (sbiw,r26,1));
+-		}
++	      {
++                if (!AVR_XMEGA) {
++                  if (AVR_TINY) {
++                    *l = 4;
++                     return (AS2 (subi,r26,lo8(-1)) CR_TAB
++                             AS2 (sbci,r27,hi8(-1)) CR_TAB
++                             AS2 (st,X,%B1)         CR_TAB
++                             AS2 (st,-X,%A1));
++                  } else {
++                    *l = 3;
++                    return (AS2 (adiw,r26,1) CR_TAB
++                            AS2 (st,X,%B1)   CR_TAB
++                            AS2 (st,-X,%A1));
++                  }
++                } else {
++                  if (AVR_TINY) {
++                    *l = 4;
++                    return (AS2 (st,X+,%A1) CR_TAB
++                            AS2 (st,X,%B1) CR_TAB
++       	                    AS2 (subi,r26,lo8(1)) CR_TAB
++                            AS2 (sbci,r27,hi8(1)));
++                  } else {
++                    *l = 3;
++                    return (AS2 (st,X+,%A1) CR_TAB
++                            AS2 (st,X,%B1) CR_TAB
++                            AS2 (sbiw,r26,1));
++                  }
++                }
++	      }
+             }
+         }
+       else
+         {
+ 	  if (!AVR_XMEGA)
+ 	  {
+-		    if(reg_base == REG_Y)
+-            return  *l=2, AVR_TINY ? (AS2 (subi,r28,lo8(-1))  CR_TAB
+-			                 AS2 (sbci,r29,hi8(-1))  CR_TAB
+-                             AS2 (st,Y,%B1)         CR_TAB
+-                             AS2 (st,-Y,%A1))
+-				              : (AS2 (std,%0+1,%B1)      CR_TAB
+-                             AS2 (st,%0,%A1));
+-		    if(reg_base == REG_Z)
+-            return  *l=2, AVR_TINY ? (AS2 (subi,r30,lo8(-1))  CR_TAB
+-			                 AS2 (sbci,r31,hi8(-1))  CR_TAB
+-                             AS2 (st,Z,%B1)         CR_TAB
+-                             AS2 (st,-Z,%A1))
+-				              : (AS2 (std,%0+1,%B1)      CR_TAB
+-                       AS2 (st,%0,%A1));
++            if(reg_base == REG_Y) {
++              if (AVR_TINY) {
++                *l = 4;
++                return (AS2 (subi,r28,lo8(-1)) CR_TAB
++		        AS2 (sbci,r29,hi8(-1)) CR_TAB
++                        AS2 (st,Y,%B1)         CR_TAB
++                        AS2 (st,-Y,%A1));
++              } else {
++		*l = 2;
++                return (AS2 (std,%0+1,%B1)     CR_TAB
++                        AS2 (st,%0,%A1));
++              }
++            }
++	    if(reg_base == REG_Z) {
++              if (AVR_TINY) {
++                *l = 4;
++                return (AS2 (subi,r30,lo8(-1)) CR_TAB
++		        AS2 (sbci,r31,hi8(-1)) CR_TAB
++                        AS2 (st,Z,%B1)         CR_TAB
++                        AS2 (st,-Z,%A1));
++              } else {
++                *l = 2;
++                return (AS2 (std,%0+1,%B1)     CR_TAB
++                        AS2 (st,%0,%A1));
++              }
++            }
+ 	  }
+ 	  else
+ 	  {
+-		    if(reg_base == REG_Y)
+-            return  *l=2, AVR_TINY ? (AS2 (st,Y+,%A1)        CR_TAB
+-                             AS2 (st,Y,%B1)        CR_TAB
+-					         AS2 (subi,r28,lo8(1))  CR_TAB
+-			                 AS2 (sbci,r29,hi8(1)))
+-					          : (AS2 (st,%0,%A1)    CR_TAB
+-                             AS2 (std,%0+1,%B1));
+-		    if(reg_base == REG_Z)
+-            return  *l=2, AVR_TINY ? (AS2 (st,Z+,%A1)         CR_TAB
+-                             AS2 (st,Z,%B1)         CR_TAB
+-					         AS2 (subi,r30,lo8(1))  CR_TAB
+-			                 AS2 (sbci,r31,hi8(1)))
+-					          : (AS2 (st,%0,%A1)    CR_TAB
+-                           AS2 (std,%0+1,%B1));
++	    if(reg_base == REG_Y) {
++              if (AVR_TINY) {
++                *l = 4;
++                return (AS2 (st,Y+,%A1)       CR_TAB
++                        AS2 (st,Y,%B1)        CR_TAB
++		        AS2 (subi,r28,lo8(1)) CR_TAB
++		        AS2 (sbci,r29,hi8(1)));
++              } else {
++		*l = 2;
++                return (AS2 (st,%0,%A1)    CR_TAB
++                        AS2 (std,%0+1,%B1));
++              }
++            }
++	    if(reg_base == REG_Z) {
++              if (AVR_TINY) {
++                *l = 4;
++                return (AS2 (st,Z+,%A1)        CR_TAB
++                        AS2 (st,Z,%B1)         CR_TAB
++		        AS2 (subi,r30,lo8(1))  CR_TAB
++		        AS2 (sbci,r31,hi8(1)));
++              } else {
++                *l = 2;
++                return (AS2 (st,%0,%A1)    CR_TAB
++                        AS2 (std,%0+1,%B1));
++              }
++            }
+         }
+     }
+     }
+@@ -3610,69 +4005,91 @@ out_movhi_mr_r (rtx insn, rtx op[], int 
+ 
+           if (!AVR_XMEGA)
+             {
+-	  if (disp <= 63 + MAX_LD_OFFSET (GET_MODE (dest)))
+-	        return *l = 4, AVR_TINY ? (AS2 (subi,r28,lo8(-(%o0-62))) CR_TAB
+-					          AS2 (sbci,r29,hi8(-(%o0-62))) CR_TAB
+-							  AS2 (subi,r28,lo8(-63))       CR_TAB
+-							  AS2 (sbci,r29,hi8(-63))       CR_TAB
+-			                  AS2 (st,Y,%B1)				 CR_TAB
+-			                  AS2 (st,-Y,%A1)				 CR_TAB
+-							  AS2 (subi,r28,lo8(62))       CR_TAB
+-							  AS2 (sbci,r29,hi8(62))       CR_TAB
+-			                  AS2 (subi,r28,lo8(%o0-62))    CR_TAB
+-			                  AS2 (sbci,r29,hi8(%o0-62)))
+-				               : (AS2 (adiw,r28,%o0-62) CR_TAB
+-			    AS2 (std,Y+63,%B1)    CR_TAB
+-			    AS2 (std,Y+62,%A1)    CR_TAB
+-			    AS2 (sbiw,r28,%o0-62));
+-
+-	      return *l = 6, AVR_TINY ? (AS2 (subi,r28,lo8(-%o0)) CR_TAB
+-			                AS2 (sbci,r29,hi8(-%o0)) CR_TAB
+-							AS2 (subi,r28,lo8(-1))   CR_TAB
+-							AS2 (sbci,r29,hi8(-1))   CR_TAB
+-			                AS2 (st,Y,%B1)           CR_TAB
+-			                AS2 (st,-Y,%A1)           CR_TAB
+-			                AS2 (subi,r28,lo8(%o0))  CR_TAB
+-			                AS2 (sbci,r29,hi8(%o0)))
+-				             : (AS2 (subi,r28,lo8(-%o0)) CR_TAB
+-			  AS2 (sbci,r29,hi8(-%o0)) CR_TAB
+-			  AS2 (std,Y+1,%B1)        CR_TAB
+-			  AS2 (st,Y,%A1)           CR_TAB
+-			  AS2 (subi,r28,lo8(%o0))  CR_TAB
+-			  AS2 (sbci,r29,hi8(%o0)));
++	  if (disp <= 63 + MAX_LD_OFFSET (GET_MODE (dest))) {
++	    if (AVR_TINY) {
++              *l = 10;
++              return (AS2 (subi,r28,lo8(-(%o0-62))) CR_TAB
++		      AS2 (sbci,r29,hi8(-(%o0-62))) CR_TAB
++		      AS2 (subi,r28,lo8(-63))       CR_TAB
++		      AS2 (sbci,r29,hi8(-63))       CR_TAB
++		      AS2 (st,Y,%B1)		    CR_TAB
++		      AS2 (st,-Y,%A1)		    CR_TAB
++		      AS2 (subi,r28,lo8(62))        CR_TAB
++		      AS2 (sbci,r29,hi8(62))        CR_TAB
++		      AS2 (subi,r28,lo8(%o0-62))    CR_TAB
++		      AS2 (sbci,r29,hi8(%o0-62)));
++            } else {
++              *l = 4;
++              return (AS2 (adiw,r28,%o0-62) CR_TAB
++		      AS2 (std,Y+63,%B1)    CR_TAB
++		      AS2 (std,Y+62,%A1)    CR_TAB
++		      AS2 (sbiw,r28,%o0-62));
++            }
++          }
++
++	      if (AVR_TINY) {
++                *l = 8;
++                return (AS2 (subi,r28,lo8(-%o0)) CR_TAB
++	                AS2 (sbci,r29,hi8(-%o0)) CR_TAB
++			AS2 (subi,r28,lo8(-1))   CR_TAB
++			AS2 (sbci,r29,hi8(-1))   CR_TAB
++	                AS2 (st,Y,%B1)           CR_TAB
++	                AS2 (st,-Y,%A1)          CR_TAB
++	                AS2 (subi,r28,lo8(%o0))  CR_TAB
++	                AS2 (sbci,r29,hi8(%o0)));
++              } else {
++		*l = 6;
++                return (AS2 (subi,r28,lo8(-%o0)) CR_TAB
++		        AS2 (sbci,r29,hi8(-%o0)) CR_TAB
++		        AS2 (std,Y+1,%B1)        CR_TAB
++		        AS2 (st,Y,%A1)           CR_TAB
++		        AS2 (subi,r28,lo8(%o0))  CR_TAB
++		        AS2 (sbci,r29,hi8(%o0)));
++              }
+ 	}
+ 	  else
+ 	    {
+- 	      if (disp <= 63 + MAX_LD_OFFSET (GET_MODE (dest)))
+-	        return *l = 4, AVR_TINY ? (AS2 (subi,r28,lo8(-(%o0-62))) CR_TAB
+-					          AS2 (sbci,r29,hi8(-(%o0-62))) CR_TAB
+-							  AS2 (subi,r28,lo8(-62))       CR_TAB
+-							  AS2 (sbci,r29,hi8(-62))       CR_TAB
+-			                  AS2 (st,Y+,%A1)				 CR_TAB
+-			                  AS2 (st,Y,%B1)				 CR_TAB
+-							  AS2 (subi,r28,lo8(63))       CR_TAB
+-							  AS2 (sbci,r29,hi8(63))       CR_TAB
+-			                  AS2 (subi,r28,lo8(%o0-62))    CR_TAB
+-			                  AS2 (sbci,r29,hi8(%o0-62)))
+-				               : (AS2 (adiw,r28,%o0-62) CR_TAB
+-			        AS2 (std,Y+62,%A1)    CR_TAB
+- 			        AS2 (std,Y+63,%B1)    CR_TAB
+- 			        AS2 (sbiw,r28,%o0-62));
++ 	      if (disp <= 63 + MAX_LD_OFFSET (GET_MODE (dest))) {
++	        if (AVR_TINY) {
++                  *l = 10; 
++                  return (AS2 (subi,r28,lo8(-(%o0-62))) CR_TAB
++                          AS2 (sbci,r29,hi8(-(%o0-62))) CR_TAB
++                      	  AS2 (subi,r28,lo8(-62))       CR_TAB
++                      	  AS2 (sbci,r29,hi8(-62))       CR_TAB
++                          AS2 (st,Y+,%A1)		CR_TAB
++                          AS2 (st,Y,%B1)		CR_TAB
++                          AS2 (subi,r28,lo8(63))        CR_TAB
++                       	  AS2 (sbci,r29,hi8(63))        CR_TAB
++                          AS2 (subi,r28,lo8(%o0-62))    CR_TAB
++                          AS2 (sbci,r29,hi8(%o0-62)));
++                } else {
++                  *l = 4;
++                  return (AS2 (adiw,r28,%o0-62) CR_TAB
++                          AS2 (std,Y+62,%A1)    CR_TAB
++                          AS2 (std,Y+63,%B1)    CR_TAB
++                          AS2 (sbiw,r28,%o0-62));
++                }
++              }
+  
+-	      return *l = 6, AVR_TINY ? (AS2 (subi,r28,lo8(-%o0)) CR_TAB
+-			                AS2 (sbci,r29,hi8(-%o0)) CR_TAB
+-			                AS2 (st,Y+,%A1)           CR_TAB
+-			                AS2 (st,Y,%B1)           CR_TAB
+-							AS2 (subi,r28,lo8(1))   CR_TAB
+-							AS2 (sbci,r29,hi8(1))   CR_TAB
+-			                AS2 (subi,r28,lo8(%o0))  CR_TAB
+-			                AS2 (sbci,r29,hi8(%o0)))
+-				             : (AS2 (subi,r28,lo8(-%o0)) CR_TAB
+- 			      AS2 (sbci,r29,hi8(-%o0)) CR_TAB
+-			      AS2 (st,Y,%A1)           CR_TAB
+- 			      AS2 (std,Y+1,%B1)        CR_TAB
+- 			      AS2 (subi,r28,lo8(%o0))  CR_TAB
+- 			      AS2 (sbci,r29,hi8(%o0)));
++	      if (AVR_TINY) {
++                *l = 8;
++                return (AS2 (subi,r28,lo8(-%o0)) CR_TAB
++                        AS2 (sbci,r29,hi8(-%o0)) CR_TAB
++                        AS2 (st,Y+,%A1)          CR_TAB
++                        AS2 (st,Y,%B1)           CR_TAB
++                        AS2 (subi,r28,lo8(1))    CR_TAB
++                        AS2 (sbci,r29,hi8(1))    CR_TAB
++                        AS2 (subi,r28,lo8(%o0))  CR_TAB
++                        AS2 (sbci,r29,hi8(%o0)));
++              } else {
++                *l = 6;
++                return (AS2 (subi,r28,lo8(-%o0)) CR_TAB
++                        AS2 (sbci,r29,hi8(-%o0)) CR_TAB
++                        AS2 (st,Y,%A1)           CR_TAB
++                        AS2 (std,Y+1,%B1)        CR_TAB
++                        AS2 (subi,r28,lo8(%o0))  CR_TAB
++                        AS2 (sbci,r29,hi8(%o0)));
++              }
+  	    }
+ 	}
+       if (reg_base == REG_X)
+@@ -3681,121 +4098,164 @@ out_movhi_mr_r (rtx insn, rtx op[], int 
+ 	  if (reg_src == REG_X)
+             {
+ 	      if (!AVR_XMEGA)
+-	        {
+-	      *l = 7;
+-	          return AVR_TINY ? (AS2 (mov,__tmp_reg__,r26)  CR_TAB
+-		                AS2 (mov,__zero_reg__,r27) CR_TAB
+-                        AS2 (subi,r26,lo8(-(%o0+1)))   CR_TAB
+-                        AS2 (sbci,r27,hi8(-(%o0+1)))   CR_TAB
+-		                AS2 (st,X,__zero_reg__)    CR_TAB
+-		                AS2 (st,-X,__tmp_reg__)    CR_TAB
+-		                AS1 (clr,__zero_reg__)     CR_TAB
+-                        AS2 (subi,r26,lo8(%o0))    CR_TAB
+-                        AS2 (sbci,r27,hi8(%o0))) 
+-				         : (AS2 (mov,__tmp_reg__,r26)  CR_TAB
+-		      AS2 (mov,__zero_reg__,r27) CR_TAB
+-                      AS2 (adiw,r26,%o0+1)       CR_TAB
+-		      AS2 (st,X,__zero_reg__)    CR_TAB
+-		      AS2 (st,-X,__tmp_reg__)    CR_TAB
+-		      AS1 (clr,__zero_reg__)     CR_TAB
+-                      AS2 (sbiw,r26,%o0));
+-	    }
++	      {
++	        if (AVR_TINY) {
++                  *l = 9;
++	          return (AS2 (mov,__tmp_reg__,r26)  CR_TAB
++                          AS2 (mov,__zero_reg__,r27) CR_TAB
++                          AS2 (subi,r26,lo8(-(%o0+1))) CR_TAB
++                          AS2 (sbci,r27,hi8(-(%o0+1))) CR_TAB
++                          AS2 (st,X,__zero_reg__)    CR_TAB
++                          AS2 (st,-X,__tmp_reg__)    CR_TAB
++                          AS1 (clr,__zero_reg__)     CR_TAB
++                          AS2 (subi,r26,lo8(%o0))    CR_TAB
++                          AS2 (sbci,r27,hi8(%o0)));
++                } else {
++                  *l = 7;
++                  return (AS2 (mov,__tmp_reg__,r26)  CR_TAB
++                          AS2 (mov,__zero_reg__,r27) CR_TAB
++                          AS2 (adiw,r26,%o0+1)       CR_TAB
++                          AS2 (st,X,__zero_reg__)    CR_TAB
++                          AS2 (st,-X,__tmp_reg__)    CR_TAB
++                          AS1 (clr,__zero_reg__)     CR_TAB
++                          AS2 (sbiw,r26,%o0));
++                }
++              }
+ 	      else
+-	        {
+- 	          *l = 7;
+-			  return AVR_TINY ? (AS2 (mov,__tmp_reg__,r26)  CR_TAB
++	      {
++                if (AVR_TINY) {
++ 	          *l = 9;
++                  return (AS2 (mov,__tmp_reg__,r26)  CR_TAB
+  		          AS2 (mov,__zero_reg__,r27) CR_TAB
+-				        AS2 (subi,r26,lo8(-(%o0)))   CR_TAB
+-				        AS2 (sbci,r27,hi8(-(%o0)))   CR_TAB
++		          AS2 (subi,r26,lo8(-(%o0)))   CR_TAB
++		          AS2 (sbci,r27,hi8(-(%o0)))   CR_TAB
+ 		          AS2 (st,X+,__tmp_reg__)    CR_TAB
+  		          AS2 (st,X,__zero_reg__)    CR_TAB
+  		          AS1 (clr,__zero_reg__)     CR_TAB
+-				        AS2 (subi,r26,lo8(%o0+1))    CR_TAB
+-				        AS2 (sbci,r27,hi8(%o0+1)))
+-				         : (AS2 (mov,__tmp_reg__,r26)  CR_TAB
+-						AS2 (mov,__zero_reg__,r27) CR_TAB
+-						AS2 (adiw,r26,%o0+1)       CR_TAB
+-						AS2 (st,X+,__tmp_reg__)    CR_TAB
+-						AS2 (st,X,__zero_reg__)    CR_TAB
+-						AS1 (clr,__zero_reg__)     CR_TAB
+-						AS2 (sbiw,r26,%o0));
+-
+-	        }
++			  AS2 (subi,r26,lo8(%o0+1))    CR_TAB
++		          AS2 (sbci,r27,hi8(%o0+1)));
++                } else {
++                  *l = 7;
++                  return (AS2 (mov,__tmp_reg__,r26)  CR_TAB
++                          AS2 (mov,__zero_reg__,r27) CR_TAB
++                          AS2 (adiw,r26,%o0+1)       CR_TAB
++                          AS2 (st,X+,__tmp_reg__)    CR_TAB
++                          AS2 (st,X,__zero_reg__)    CR_TAB
++                          AS1 (clr,__zero_reg__)     CR_TAB
++                          AS2 (sbiw,r26,%o0));
++                }
++	      }
+ 	    }
+ 	  if (!AVR_XMEGA)
+-            {	    
+-	  *l = 4;
+-              return AVR_TINY ? (AS2 (subi,r26,lo8(-(%o0+1)))   CR_TAB
+-                        AS2 (sbci,r27,hi8(-(%o0+1)))   CR_TAB
+-                        AS2 (st,X,%B1)       CR_TAB
+-                        AS2 (st,-X,%A1)      CR_TAB
+-                        AS2 (subi,r26,lo8(%o0))    CR_TAB
+-                        AS2 (sbci,r27,hi8(%o0))) 
+-				         : (AS2 (adiw,r26,%o0+1) CR_TAB
+-                  AS2 (st,X,%B1)       CR_TAB
+-                  AS2 (st,-X,%A1)      CR_TAB
+-                  AS2 (sbiw,r26,%o0));
+-	}
++          {
++            if (AVR_TINY) {
++              *l = 6;
++              return (AS2 (subi,r26,lo8(-(%o0+1)))   CR_TAB
++                      AS2 (sbci,r27,hi8(-(%o0+1)))   CR_TAB
++                      AS2 (st,X,%B1)       CR_TAB
++                      AS2 (st,-X,%A1)      CR_TAB
++                      AS2 (subi,r26,lo8(%o0))    CR_TAB
++                      AS2 (sbci,r27,hi8(%o0)));
++            } else {
++              *l = 4;
++              return (AS2 (adiw,r26,%o0+1) CR_TAB
++                      AS2 (st,X,%B1)       CR_TAB
++                      AS2 (st,-X,%A1)      CR_TAB
++                      AS2 (sbiw,r26,%o0));
++            }
++          }
+ 	  else
+-	    {
+- 	      *l = 4;
+-              return AVR_TINY ? (AS2 (subi,r26,lo8(-(%o0)))   CR_TAB
+-                        AS2 (sbci,r27,hi8(-(%o0)))   CR_TAB
+-                        AS2 (st,X+,%A1)       CR_TAB
+-                        AS2 (st,X,%B1)      CR_TAB
+-                        AS2 (subi,r26,lo8(%o0))    CR_TAB
+-                        AS2 (sbci,r27,hi8(%o0))) 
+-				         : (AS2 (adiw,r26,%o0) CR_TAB
++          {
++ 	    if (AVR_TINY) {
++              *l = 6;
++              return (AS2 (subi,r26,lo8(-(%o0))) CR_TAB
++                      AS2 (sbci,r27,hi8(-(%o0))) CR_TAB
++                      AS2 (st,X+,%A1)            CR_TAB
++                      AS2 (st,X,%B1)             CR_TAB
++                      AS2 (subi,r26,lo8(%o0))    CR_TAB
++                      AS2 (sbci,r27,hi8(%o0)));
++            } else {
++              *l = 4;
++              return (AS2 (adiw,r26,%o0) CR_TAB
+ 		      AS2 (st,X+,%A1)    CR_TAB
+ 		      AS2 (st,X,%B1)     CR_TAB
+ 		      AS2 (sbiw,r26,%o0+1));
+             }
++          }
+ 	}
+ 	
+       if (!AVR_XMEGA)
+-	  {
+-		op[2] = XEXP(base, 0);
+-		if(REGNO(op[2]) == REG_Y)
+-        return *l=2, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o0+2)))    CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o0+2)))    CR_TAB
+-						AS2 (st,-Y,%B1)                  CR_TAB
+-                        AS2 (st,-Y,%A1)                  CR_TAB
+-                        AS2 (subi,%A2,lo8(%o0))    CR_TAB
+-						AS2 (sbci,%B2,hi8(%o0)))   
+-			             : (AS2 (std,%B0,%B1)    CR_TAB
++      {
++	op[2] = XEXP(base, 0);
++        if(REGNO(op[2]) == REG_Y)
++        {
++          if (AVR_TINY) {
++            *l = 6;
++            return (AS2 (subi,%A2,lo8(-(%o0+2))) CR_TAB
++                    AS2 (sbci,%B2,hi8(-(%o0+2))) CR_TAB
++                    AS2 (st,-Y,%B1)              CR_TAB
++                    AS2 (st,-Y,%A1)              CR_TAB
++                    AS2 (subi,%A2,lo8(%o0))      CR_TAB
++                    AS2 (sbci,%B2,hi8(%o0)));
++          } else {
++            *l = 2;
++            return (AS2 (std,%B0,%B1)    CR_TAB
+                     AS2 (std,%A0,%A1));
+-		if(REGNO(op[2]) == REG_Z)
+-        return *l=2, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o0+2)))    CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o0+2)))    CR_TAB
+-						AS2 (st,-Z,%B1)                  CR_TAB
+-                        AS2 (st,-Z,%A1)                  CR_TAB
+-                        AS2 (subi,%A2,lo8(%o0))    CR_TAB
+-						AS2 (sbci,%B2,hi8(%o0)))   
+-			             : (AS2 (std,%B0,%B1)    CR_TAB
+-                        AS2 (std,%A0,%A1));
+-	  }
++          }
++        }
++        if(REGNO(op[2]) == REG_Z)
++        {
++          if (AVR_TINY) {
++            *l = 6;
++            return (AS2 (subi,%A2,lo8(-(%o0+2))) CR_TAB
++                    AS2 (sbci,%B2,hi8(-(%o0+2))) CR_TAB
++                    AS2 (st,-Z,%B1)              CR_TAB
++                    AS2 (st,-Z,%A1)              CR_TAB
++                    AS2 (subi,%A2,lo8(%o0))      CR_TAB
++                    AS2 (sbci,%B2,hi8(%o0)));
++          } else {
++            *l = 2;
++            return (AS2 (std,%B0,%B1)    CR_TAB
++                    AS2 (std,%A0,%A1));
++          }
++        }
++      }
+       else
+-	  {
+-		op[2] = XEXP(base, 0);
+-		if(REGNO(op[2]) == REG_Y)
+-        return *l=2, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o0)))    CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o0)))    CR_TAB
+-                        AS2 (st,Y+,%A1)                CR_TAB
+-						AS2 (st,Y,%B1)                 CR_TAB                 
+-				        AS2 (subi,%A2,lo8(%o0+1))    CR_TAB
+-						AS2 (sbci,%B2,hi8(%o0+1)))
+-                         : (AS2 (std,%A0,%A1)    CR_TAB
+-	              AS2 (std,%B0,%B1));
+-		if(REGNO(op[2]) == REG_Z)
+-        return *l=2, AVR_TINY ? (AS2 (subi,%A2,lo8(-(%o0)))    CR_TAB
+-						AS2 (sbci,%B2,hi8(-(%o0)))    CR_TAB
+-                        AS2 (st,Z+,%A1)                CR_TAB
+-						AS2 (st,Z,%B1)                CR_TAB 
+-				        AS2 (subi,%A2,lo8(%o0+1))    CR_TAB
+-						AS2 (sbci,%B2,hi8(%o0+1))) 
+-                         : (AS2 (std,%A0,%A1)    CR_TAB
+-	                    AS2 (std,%B0,%B1));
+-	  }
++      {
++        op[2] = XEXP(base, 0);
++        if(REGNO(op[2]) == REG_Y)
++        {
++          if (AVR_TINY) {
++            *l = 6;
++            return (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
++                    AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
++                    AS2 (st,Y+,%A1)            CR_TAB
++                    AS2 (st,Y,%B1)             CR_TAB                 
++                    AS2 (subi,%A2,lo8(%o0+1))  CR_TAB
++                    AS2 (sbci,%B2,hi8(%o0+1)));
++          } else {
++            *l = 2;
++            return (AS2 (std,%A0,%A1)    CR_TAB
++                    AS2 (std,%B0,%B1));
++          }
++        }
++        if(REGNO(op[2]) == REG_Z)
++        {
++          if (AVR_TINY) {
++            *l = 6;
++            return (AS2 (subi,%A2,lo8(-(%o0))) CR_TAB
++                    AS2 (sbci,%B2,hi8(-(%o0))) CR_TAB
++                    AS2 (st,Z+,%A1)            CR_TAB
++                    AS2 (st,Z,%B1)             CR_TAB 
++                    AS2 (subi,%A2,lo8(%o0+1))  CR_TAB
++                    AS2 (sbci,%B2,hi8(%o0+1)));
++          } else {
++            *l = 2;
++            return (AS2 (std,%A0,%A1)    CR_TAB
++                    AS2 (std,%B0,%B1));
++          }
++        }
++      }
+     }
+   else if (GET_CODE (base) == PRE_DEC) /* (--R) */
+     {
+@@ -3814,33 +4274,41 @@ out_movhi_mr_r (rtx insn, rtx op[], int 
+         {
+           if (REGNO (XEXP (base, 0)) == REG_X)
+             {
+-              *l = 4;
+-              return AVR_TINY ? (AS2 (subi,r26,lo8(-1))  CR_TAB
+-					    AS2 (sbci,r27,hi8(-1))  CR_TAB
++              if (AVR_TINY) {
++                *l = 6;
++                return (AS2 (subi,r26,lo8(-1))  CR_TAB
++                        AS2 (sbci,r27,hi8(-1))  CR_TAB
+                         AS2 (st,X,%B1)    CR_TAB
+                         AS2 (st,-X,%A1)   CR_TAB
+-						AS2 (subi,r26,lo8(-2)) CR_TAB
+-						AS2 (sbci,r27,hi8(-2)))
+-				         : (AS2 (adiw,r26,1)  CR_TAB
+-                      AS2 (st,X,%B1)    CR_TAB
+-                      AS2 (st,-X,%A1)   CR_TAB
+-                      AS2 (adiw,r26,2));
++                      	AS2 (subi,r26,lo8(-2)) CR_TAB
++                        AS2 (sbci,r27,hi8(-2)));
++              } else {
++                *l = 4;
++                return (AS2 (adiw,r26,1)  CR_TAB
++                        AS2 (st,X,%B1)    CR_TAB
++                        AS2 (st,-X,%A1)   CR_TAB
++                        AS2 (adiw,r26,2));
++              }
+             }
+           else
+             {
+-			  //FIXME:check the code once again for AVR_TINY
+-              *l = 3;
+-              return AVR_TINY ? (AS2 (subi,%A0,lo8(-1)) CR_TAB
+-						AS2 (sbci,%B0,hi8(-1)) CR_TAB
+-						AS2 (st,%p0,%B1)       CR_TAB
+-                        AS2 (subi,%A0,lo8(1)) CR_TAB
+-						AS2 (sbci,%B0,hi8(1)) CR_TAB
++              //FIXME:check the code once again for AVR_TINY
++              if (AVR_TINY) {
++                *l = 8;
++                return (AS2 (subi,%A0,lo8(-1)) CR_TAB
++                        AS2 (sbci,%B0,hi8(-1)) CR_TAB
++                        AS2 (st,%p0,%B1)       CR_TAB
++                        AS2 (subi,%A0,lo8(1))  CR_TAB
++                        AS2 (sbci,%B0,hi8(1))  CR_TAB
+                         AS2 (st,%p0,%A1)       CR_TAB
+                         AS2 (subi,%A0,lo8(-3)) CR_TAB 
+-					    AS2 (sbci,%B0,hi8(-3)))
+-				         : (AS2 (std,%p0+1,%B1) CR_TAB
+-                      AS2 (st,%p0,%A1)    CR_TAB
+-                      AS2 (adiw,%r0,2));
++                        AS2 (sbci,%B0,hi8(-3)));
++              } else {
++                *l = 3;
++                return (AS2 (std,%p0+1,%B1) CR_TAB
++                        AS2 (st,%p0,%A1)    CR_TAB
++                        AS2 (adiw,%r0,2));
++              }
+             }
+         }
+ 
+@@ -3927,10 +4395,14 @@ out_tsthi (rtx insn, rtx op, int *l)
+     }
+   if (test_hard_reg_class (ADDW_REGS, op))
+     {
+-      if (l) *l = 1;
+-      return AVR_TINY ? (AS2 (subi,%A0,lo8(0)) CR_TAB
+-				AS2 (sbci,%B0,hi8(0)))
+-		         :  AS2 (sbiw,%0,0);
++      if (AVR_TINY) {
++        if (l) *l = 2;
++        return (AS2 (subi,%A0,lo8(0)) CR_TAB
++                AS2 (sbci,%B0,hi8(0)));
++      } else {
++        if (l) *l = 1;
++        return (AS2 (sbiw,%0,0));
++      }
+     }
+   if (l) *l = 2;
+   return (AS2 (cp,%A0,__zero_reg__) CR_TAB
+@@ -3950,14 +4422,18 @@ out_tstsi (rtx insn, rtx op, int *l)
+     }
+   if (test_hard_reg_class (ADDW_REGS, op))
+     {
+-      if (l) *l = 3;
+-      return AVR_TINY ? (AS2 (subi,%A0,lo8(-(-0))) CR_TAB
+-				AS2 (sbci,%B0,hi8(-(-0))) CR_TAB
++      if (AVR_TINY) {
++        if (l) *l = 4;
++        return (AS2 (subi,%A0,lo8(-(-0))) CR_TAB
++                AS2 (sbci,%B0,hi8(-(-0))) CR_TAB
+                 AS2 (cpc,%C0,__zero_reg__) CR_TAB
+-                AS2 (cpc,%D0,__zero_reg__))
+-		         : (AS2 (sbiw,%A0,0) CR_TAB
+-              AS2 (cpc,%C0,__zero_reg__) CR_TAB
+-              AS2 (cpc,%D0,__zero_reg__));
++                AS2 (cpc,%D0,__zero_reg__));
++      } else {
++        if (l) *l = 3;
++        return (AS2 (sbiw,%A0,0) CR_TAB
++                AS2 (cpc,%C0,__zero_reg__) CR_TAB
++                AS2 (cpc,%D0,__zero_reg__));
++      }
+     }
+   if (l) *l = 4;
+   return (AS2 (cp,%A0,__zero_reg__) CR_TAB

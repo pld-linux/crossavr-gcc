@@ -1,0 +1,173 @@
+diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
+--- gcc/config/avr/avr.c	2012-06-22 15:29:05.000000000 +0530
++++ gcc/config/avr/avr.c	2012-06-28 12:50:23.000000000 +0530
+@@ -111,6 +111,9 @@ static void avr_help (void);
+ /* Allocate registers from r25 to r8 for parameters for function calls.  */
+ #define FIRST_CUM_REG 26
+ 
++/* Last call saved register */
++#define LAST_CALLEE_SAVED_REG (AVR_TINY ? 21 : 17)
++
+ /* Temporary register RTX (gen_rtx_REG (QImode, TMP_REGNO)) */
+ static GTY(()) rtx tmp_reg_rtx;
+ 
+@@ -611,7 +614,7 @@ sequent_regs_live (void)
+   int live_seq=0;
+   int cur_seq=0;
+ 
+-  for (reg = 0; reg < 18; ++reg)
++  for (reg = 0; reg <= LAST_CALLEE_SAVED_REG; ++reg)
+     {
+       if (fixed_regs[reg])
+         {
+@@ -838,11 +841,11 @@ expand_prologue (void)
+ 
+       /* Note that live_seq always contains r28+r29, but the other
+ 	 registers to be saved are all below 18.  */
+-      first_reg = 18 - (live_seq - 2);
++      first_reg = (LAST_CALLEE_SAVED_REG + 1) - (live_seq - 2);
+ 
+       for (reg = 29, offset = -live_seq + 1;
+ 	   reg >= first_reg;
+-	   reg = (reg == 28 ? 17 : reg - 1), ++offset)
++	   reg = (reg == 28 ? (LAST_CALLEE_SAVED_REG) : reg - 1), ++offset)
+ 	{
+ 	  rtx m, r;
+ 
+@@ -6375,6 +6378,17 @@ order_regs_for_local_alloc (void)
+     0,1,
+     32,33,34,35
+   };
++  static const int tiny_order_0[] = {
++    24,25,
++    22,23,
++    30,31,
++    26,27,
++    28,29,
++    21,20,19,18,
++    16,17,
++    32,33,34,35,
++    15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
++  };
+   static const int order_1[] = {
+     18,19,
+     20,21,
+@@ -6387,6 +6401,17 @@ order_regs_for_local_alloc (void)
+     0,1,
+     32,33,34,35
+   };
++  static const int tiny_order_1[] = {
++    22,23,
++    24,25,
++    30,31,
++    26,27,
++    28,29,
++    21,20,19,18,
++    16,17,
++    32,33,34,35,
++    15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
++  };
+   static const int order_2[] = {
+     25,24,
+     23,22,
+@@ -6400,10 +6425,15 @@ order_regs_for_local_alloc (void)
+     1,0,
+     32,33,34,35
+   };
+-  
+-  const int *order = (TARGET_ORDER_1 ? order_1 :
+-		      TARGET_ORDER_2 ? order_2 :
+-		      order_0);
++ 
++  /*
++  Select specific register allocation order. Tiny Core (attiny4/5/9/10/20/40)
++  devices has only 16 registers, so different allocation order should be used
++  */ 
++  const int *order = (TARGET_ORDER_1 ? (AVR_TINY ? tiny_order_1 : order_1) :
++		      TARGET_ORDER_2 ? (AVR_TINY ? tiny_order_1 : order_2) :
++                                       (AVR_TINY ? tiny_order_0 : order_0));
++
+   for (i=0; i < ARRAY_SIZE (order_0); ++i)
+       reg_alloc_order[i] = order[i];
+ }
+@@ -7395,15 +7425,45 @@ avr_output_addr_vec_elt (FILE *stream, i
+ 
+ static void
+ avr_conditional_register_usage(void) {
+-   if (AVR_TINY) {                             
+-     int i;                                    
+-     for (i = 0;  i <= 17;  i++) {             
+-       fixed_regs[i] = 1;                      
+-       call_used_regs[i] = 1;                  
+-     }                                         
+-	CLEAR_HARD_REG_SET(reg_class_contents[(int)ADDW_REGS]);           
+-	CLEAR_HARD_REG_SET(reg_class_contents[(int)NO_LD_REGS]);           
+-   }
++  if (AVR_TINY) {
++    int i;
++
++    const int tiny_reg_alloc_order[] = {
++      24,25,
++      22,23,
++      30,31,
++      26,27,
++      28,29,
++      21,20,19,18,
++      16,17,
++      32,33,34,35,
++      15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0
++    };
++
++    /* Set R0-R17 as fixed registers. Reset R0-R17 in call used register list
++    - R0-R15 are not available in Tiny Core devices
++    - R16 and R17 are fixed registers
++    */
++    for (i = 0;  i <= 17;  i++) {
++      fixed_regs[i] = 1;
++      call_used_regs[i] = 1;
++    }
++
++    /* Set R18 to R21 as call used register 
++    - R18, R19, R20 and R21 are the call used registers in Tiny Core devices
++    */
++    for (i = 18; i <= LAST_CALLEE_SAVED_REG; i++) {
++      call_used_regs[i] = 0;
++    }
++
++    /*update register allocation order for Tiny Core devices */
++    for (i=0; i < ARRAY_SIZE (tiny_reg_alloc_order); i++) {
++      reg_alloc_order[i] = tiny_reg_alloc_order[i];
++    }
++
++    CLEAR_HARD_REG_SET(reg_class_contents[(int)ADDW_REGS]);
++    CLEAR_HARD_REG_SET(reg_class_contents[(int)NO_LD_REGS]);
++  }
+ }
+ 
+ /* Returns true if SCRATCH are safe to be allocated as a scratch
+@@ -7553,13 +7613,20 @@ avr_asm_out_dtor (rtx symbol, int priori
+ static bool
+ avr_return_in_memory (const_tree type, const_tree fntype ATTRIBUTE_UNUSED)
+ {
+-  if (TYPE_MODE (type) == BLKmode)
+-    {
+-      HOST_WIDE_INT size = int_size_in_bytes (type);
+-      return (size == -1 || size > 8);
+-    }
++  HOST_WIDE_INT size = int_size_in_bytes (type);
++  HOST_WIDE_INT ret_size_limit = AVR_TINY ? 4 : 8;
++
++  /* In avr, there are 8 return registers. But, for Tiny Core 
++  (attiny4/5/9/10/20/40) devices, only 4 registers available.
++  Return true if size is unknown or greater than the limit */
++  if ((size == -1) || (size > ret_size_limit))
++  {
++    return true;
++  }
+   else
++  {
+     return false;
++  }
+ }
+ 
+ /* Worker function for CASE_VALUES_THRESHOLD.  */
