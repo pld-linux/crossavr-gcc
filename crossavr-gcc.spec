@@ -10,7 +10,7 @@ Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AV
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
 Version:	4.6.2
-Release:	5
+Release:	6
 Epoch:		1
 Patch1:		gcc-bug51969.patch
 # Patches 1xx are taken form Atmel official AVR8-GNU toolchain version 3.4.0.663.
@@ -73,6 +73,7 @@ BuildRequires:	gmp-devel >= 4.1
 BuildRequires:	libmpc-devel
 BuildRequires:	mpfr-devel >= 2.3.0
 BuildRequires:	perl-tools-pod
+BuildRequires:	ppl-devel
 BuildRequires:	rpmbuild(macros) >= 1.565
 BuildRequires:	sed >= 4.0
 Requires:	crossavr-binutils >= 2.15.91.0.2
@@ -190,6 +191,8 @@ TEXCONFIG=false \
 	--with-gnu-ld \
 	--with-system-zlib \
 	--with-multilib \
+	--with-ppl \
+	--disable-ppl-version-check \
 	--without-x \
 	--build=%{_target_platform} \
 	--host=%{_target_platform} \
