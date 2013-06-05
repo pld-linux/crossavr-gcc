@@ -9,7 +9,7 @@ diff -Naurp gcc/config/avr/avr-devices.c gcc/config/avr/avr-devices.c
    { "attiny13",             ARCH_AVR25, "__AVR_ATtiny13__",         1, 0x0060, "tn13" },
    { "attiny13a",            ARCH_AVR25, "__AVR_ATtiny13A__",        1, 0x0060, "tn13a" },
    { "attiny2313",           ARCH_AVR25, "__AVR_ATtiny2313__",       1, 0x0060, "tn2313" },
-@@ -108,6 +109,7 @@ const struct mcu_type_s avr_mcu_types[] 
+@@ -109,6 +110,7 @@ const struct mcu_type_s avr_mcu_types[] 
    { "at43usb320",           ARCH_AVR31, "__AVR_AT43USB320__",       0, 0x0060, "43320" },
      /* Classic, >=16K, <=64K + 2-byte PC + { MOVW/LPMX + JMP/CALL }.  */
    { "avr35",                ARCH_AVR35, NULL,                       0, 0x0100, "usb162" },
@@ -28,7 +28,7 @@ diff -Naurp gcc/config/avr/t-avr gcc/config/avr/t-avr
  	mmcu?avr25=mmcu?ata6289 \
  	mmcu?avr25=mmcu?attiny13 \
  	mmcu?avr25=mmcu?attiny13a \
-@@ -146,6 +147,7 @@ MULTILIB_MATCHES = \
+@@ -147,6 +148,7 @@ MULTILIB_MATCHES = \
  	mmcu?avr31=mmcu?at43usb320 \
  	mmcu?avr35=mmcu?at90usb82 \
  	mmcu?avr35=mmcu?at90usb162 \
