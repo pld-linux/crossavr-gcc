@@ -1,0 +1,59 @@
+diff --git gcc/common/config/avr/avr-common.c gcc/common/config/avr/avr-common.c
+index 0ede117..b2b8359 100644
+--- gcc/common/config/avr/avr-common.c
++++ gcc/common/config/avr/avr-common.c
+@@ -32,10 +32,39 @@ static const struct default_options avr_option_optimization_table[] =
+     { OPT_LEVELS_NONE, 0, NULL, 0 }
+   };
+ 
++static bool
++avr_handle_target_option (struct gcc_options *opts,
++        struct gcc_options *opts_set, const struct cl_decoded_option *decoded,
++        location_t loc)
++{
++  if (avr_list_supported_parts)
++    {
++      const struct mcu_type_s *list_part;
++
++      fprintf (stdout, "List of parts supported by avr-gcc:\n");
++
++      for (list_part = &avr_mcu_types[0]; list_part->name; list_part++)
++        {
++          if (!list_part->macro)
++            list_part++;
++          fprintf (stdout, "%-20s%s\n", list_part->name, list_part->macro);
++        }
++
++      fprintf (stdout, "\n");
++
++    }
++
++  return true;
++}
++
++
+ #undef TARGET_OPTION_OPTIMIZATION_TABLE
+ #define TARGET_OPTION_OPTIMIZATION_TABLE avr_option_optimization_table
+ 
+ #undef TARGET_EXCEPT_UNWIND_INFO
+ #define TARGET_EXCEPT_UNWIND_INFO sjlj_except_unwind_info
+ 
++#undef TARGET_HANDLE_OPTION
++#define TARGET_HANDLE_OPTION avr_handle_target_option
++
+ struct gcc_targetm_common targetm_common = TARGETM_COMMON_INITIALIZER;
+diff --git gcc/config/avr/avr.opt gcc/config/avr/avr.opt
+index 0ad38c6..3649c5b 100644
+--- gcc/config/avr/avr.opt
++++ gcc/config/avr/avr.opt
+@@ -66,6 +66,10 @@ mpmem-wrap-around
+ Target Report
+ Make the linker relaxation machine assume that a program counter wrap-around occurs.
+ 
++mlist-devices
++Target RejectNegative Var(avr_list_supported_parts)
++Print the list of parts supported while printing --target-help
++
+ maccumulate-args
+ Target Report Mask(ACCUMULATE_OUTGOING_ARGS)
+ Accumulate outgoing function arguments and acquire/release the needed stack space for outpoing function arguments in function prologue/epilogue.  Without this option, outgoing arguments are pushed before calling a function and popped afterwards.  This option can lead to reduced code size for functions that call many functions that get their arguments on the stack like, for example printf.

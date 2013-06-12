@@ -1,0 +1,38 @@
+diff -Naurp gcc/config/avr/avr-mcus.def gcc/config/avr/avr-mcus.def
+--- gcc/config/avr/avr-mcus.def	2012-12-21 15:00:20.000000000 +0530
++++ gcc/config/avr/avr-mcus.def	2012-12-21 14:52:57.000000000 +0530
+@@ -48,7 +48,6 @@ AVR_MCU ("at90c8534",            ARCH_AV
+ AVR_MCU ("at90s8535",            ARCH_AVR2, "__AVR_AT90S8535__",         0, 0, 0x0060, 1, "s8535")
+ /* Classic + MOVW, <= 8K.  */
+ AVR_MCU ("avr25",                ARCH_AVR25, NULL,                       0, 0, 0x0060, 1, "tn85")
+-AVR_MCU ("ata6289",              ARCH_AVR25, "__AVR_ATA6289__",          0, 0, 0x0100, 1, "a6289")
+ AVR_MCU ("attiny13",             ARCH_AVR25, "__AVR_ATtiny13__",         1, 0, 0x0060, 1, "tn13")
+ AVR_MCU ("attiny13a",            ARCH_AVR25, "__AVR_ATtiny13A__",        1, 0, 0x0060, 1, "tn13a")
+ AVR_MCU ("attiny2313",           ARCH_AVR25, "__AVR_ATtiny2313__",       1, 0, 0x0060, 1, "tn2313")
+@@ -92,6 +91,7 @@ AVR_MCU ("atmega32u2",           ARCH_AV
+ AVR_MCU ("attiny167",            ARCH_AVR35, "__AVR_ATtiny167__",        0, 0, 0x0100, 1, "tn167")
+ /* Enhanced, <= 8K.  */
+ AVR_MCU ("avr4",                 ARCH_AVR4, NULL,                        0, 0, 0x0060, 1, "m8")
++AVR_MCU ("ata6289",              ARCH_AVR4, "__AVR_ATA6289__",           0, 0, 0x0100, 1, "a6289")
+ AVR_MCU ("atmega8",              ARCH_AVR4, "__AVR_ATmega8__",           0, 0, 0x0060, 1, "m8")
+ AVR_MCU ("atmega48",             ARCH_AVR4, "__AVR_ATmega48__",          0, 0, 0x0100, 1, "m48")
+ AVR_MCU ("atmega48a",            ARCH_AVR4, "__AVR_ATmega48A__",         0, 0, 0x0100, 1, "m48a")
+diff -Naurp gcc/config/avr/t-multilib gcc/config/avr/t-multilib
+--- gcc/config/avr/t-multilib	2012-12-21 15:00:06.000000000 +0530
++++ gcc/config/avr/t-multilib	2012-12-21 14:56:29.000000000 +0530
+@@ -53,7 +53,6 @@ MULTILIB_MATCHES = \
+ 	mmcu?avr2=mmcu?at90s8515 \
+ 	mmcu?avr2=mmcu?at90c8534 \
+ 	mmcu?avr2=mmcu?at90s8535 \
+-	mmcu?avr25=mmcu?ata6289 \
+ 	mmcu?avr25=mmcu?attiny13 \
+ 	mmcu?avr25=mmcu?attiny13a \
+ 	mmcu?avr25=mmcu?attiny2313 \
+@@ -89,6 +88,7 @@ MULTILIB_MATCHES = \
+ 	mmcu?avr35=mmcu?atmega16u2 \
+ 	mmcu?avr35=mmcu?atmega32u2 \
+ 	mmcu?avr35=mmcu?attiny167 \
++	mmcu?avr4=mmcu?ata6289 \
+ 	mmcu?avr4=mmcu?atmega8 \
+ 	mmcu?avr4=mmcu?atmega48 \
+ 	mmcu?avr4=mmcu?atmega48a \

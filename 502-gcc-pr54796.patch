@@ -1,0 +1,139 @@
+diff -Naurp gcc/alias.c gcc/alias.c
+--- gcc/alias.c	2012-03-01 22:28:11.000000000 +0530
++++ gcc/alias.c	2012-11-06 15:25:38.000000000 +0530
+@@ -1595,6 +1595,9 @@ find_base_term (rtx x)
+       if (!val)
+ 	return ret;
+ 
++      if (cselib_sp_based_value_p (val))
++	return static_reg_base_value[STACK_POINTER_REGNUM];
++
+       f = val->locs;
+       /* Temporarily reset val->locs to avoid infinite recursion.  */
+       val->locs = NULL;
+diff -Naurp gcc/cselib.c gcc/cselib.c
+--- gcc/cselib.c	2012-03-01 22:28:11.000000000 +0530
++++ gcc/cselib.c	2012-11-06 15:25:38.000000000 +0530
+@@ -209,6 +209,9 @@ void (*cselib_record_sets_hook) (rtx ins
+ #define PRESERVED_VALUE_P(RTX) \
+   (RTL_FLAG_CHECK1("PRESERVED_VALUE_P", (RTX), VALUE)->unchanging)
+ 
++#define SP_BASED_VALUE_P(RTX) \
++  (RTL_FLAG_CHECK1("SP_BASED_VALUE_P", (RTX), VALUE)->jump)
++
+ 
+ 
+ /* Allocate a struct elt_list and fill in its two elements with the
+@@ -738,6 +741,23 @@ cselib_preserve_only_values (void)
+   gcc_assert (first_containing_mem == &dummy_val);
+ }
+ 
++/* Arrange for a value to be marked as based on stack pointer
++   for find_base_term purposes.  */
++
++void
++cselib_set_value_sp_based (cselib_val *v)
++{
++  SP_BASED_VALUE_P (v->val_rtx) = 1;
++}
++
++/* Test whether a value is preserved.  */
++
++bool
++cselib_sp_based_value_p (cselib_val *v)
++{
++  return SP_BASED_VALUE_P (v->val_rtx);
++}
++
+ /* Return the mode in which a register was last set.  If X is not a
+    register, return its mode.  If the mode in which the register was
+    set is not known, or the value was already clobbered, return
+diff -Naurp gcc/cselib.h gcc/cselib.h
+--- gcc/cselib.h	2012-03-01 22:28:11.000000000 +0530
++++ gcc/cselib.h	2012-11-06 15:25:38.000000000 +0530
+@@ -99,6 +99,8 @@ extern void cselib_preserve_only_values 
+ extern void cselib_preserve_cfa_base_value (cselib_val *, unsigned int);
+ extern void cselib_add_permanent_equiv (cselib_val *, rtx, rtx);
+ extern bool cselib_have_permanent_equivalences (void);
++extern void cselib_set_value_sp_based (cselib_val *);
++extern bool cselib_sp_based_value_p (cselib_val *);
+ 
+ extern void dump_cselib_table (FILE *);
+ 
+diff -Naurp gcc/rtl.h gcc/rtl.h
+--- gcc/rtl.h	2012-01-25 00:36:38.000000000 +0530
++++ gcc/rtl.h	2012-11-06 15:25:38.000000000 +0530
+@@ -266,7 +266,8 @@ struct GTY((chain_next ("RTX_NEXT (&%h)"
+      1 in a CALL_INSN if it is a sibling call.
+      1 in a SET that is for a return.
+      In a CODE_LABEL, part of the two-bit alternate entry field.
+-     1 in a CONCAT is VAL_EXPR_IS_COPIED in var-tracking.c.  */
++     1 in a CONCAT is VAL_EXPR_IS_COPIED in var-tracking.c.
++     1 in a VALUE is SP_BASED_VALUE_P in cselib.c.  */
+   unsigned int jump : 1;
+   /* In a CODE_LABEL, part of the two-bit alternate entry field.
+      1 in a MEM if it cannot trap.
+diff -Naurp gcc/testsuite/gcc.dg/guality/pr54796.c gcc/testsuite/gcc.dg/guality/pr54796.c
+--- gcc/testsuite/gcc.dg/guality/pr54796.c	1970-01-01 05:30:00.000000000 +0530
++++ gcc/testsuite/gcc.dg/guality/pr54796.c	2012-11-06 15:25:38.000000000 +0530
+@@ -0,0 +1,25 @@
++/* PR debug/54796 */
++/* { dg-do run } */
++/* { dg-options "-g" } */
++
++__attribute__((noinline, noclone)) void
++bar (char *a, int b)
++{
++  __asm volatile ("" : "+r" (a), "+r" (b) : : "memory");
++}
++
++__attribute__((noinline, noclone)) void
++foo (int a, int b)
++{
++  int c = a;
++  char d[b];	/* { dg-final { gdb-test 17 "a" "5" } } */
++  bar (d, 2);	/* { dg-final { gdb-test 17 "b" "6" } } */
++  bar (d, 4);	/* { dg-final { gdb-test 17 "c" "5" } } */
++}
++
++int
++main ()
++{
++  foo (5, 6);
++  return 0;
++}
+diff -Naurp gcc/var-tracking.c gcc/var-tracking.c
+--- gcc/var-tracking.c	2012-02-25 17:39:27.000000000 +0530
++++ gcc/var-tracking.c	2012-11-06 15:25:38.000000000 +0530
+@@ -5521,6 +5521,11 @@ add_stores (rtx loc, const_rtx expr, voi
+ 
+   resolve = preserve = !cselib_preserved_value_p (v);
+ 
++  if (loc == stack_pointer_rtx
++      && hard_frame_pointer_adjustment != -1
++      && preserve)
++    cselib_set_value_sp_based (v);
++
+   nloc = replace_expr_with_values (oloc);
+   if (nloc)
+     oloc = nloc;
+@@ -9446,6 +9451,19 @@ vt_initialize (void)
+ 		    {
+ 		      vt_init_cfa_base ();
+ 		      hard_frame_pointer_adjustment = fp_cfa_offset;
++		      /* Disassociate sp from fp now.  */
++		      if (MAY_HAVE_DEBUG_INSNS)
++			{
++			  cselib_val *v;
++			  cselib_invalidate_rtx (stack_pointer_rtx);
++			  v = cselib_lookup (stack_pointer_rtx, Pmode, 1,
++					     VOIDmode);
++			  if (v && !cselib_preserved_value_p (v))
++			    {
++			      cselib_set_value_sp_based (v);
++			      preserve_value (v);
++			    }
++			}
+ 		    }
+ 		}
+ 	    }

@@ -1,0 +1,11 @@
+diff -Naurp gcc/config/avr/avr-mcus.def gcc/config/avr/avr-mcus.def
+--- gcc/config/avr/avr-mcus.def	2013-03-25 10:50:37.000000000 +0530
++++ gcc/config/avr/avr-mcus.def	2013-03-25 11:52:38.000000000 +0530
+@@ -251,6 +251,7 @@ AVR_MCU ("atmxt112sl",       ARCH_AVRXME
+ AVR_MCU ("atmxt224",         ARCH_AVRXMEGA2, "__AVR_ATMXT224__",         0, 0, 0x2000, 1, "mxt224")
+ AVR_MCU ("atmxt224e",        ARCH_AVRXMEGA2, "__AVR_ATMXT224E__",        0, 0, 0x2000, 1, "mxt224e")
+ AVR_MCU ("atmxt336s",        ARCH_AVRXMEGA2, "__AVR_ATMXT336S__",        0, 0, 0x2000, 1, "mxt336s")
++AVR_MCU ("atmxts200",        ARCH_AVRXMEGA2, "__AVR_ATMXTS200__",        0, 0, 0x2000, 1, "mxts200")
+ AVR_MCU ("atxmega16a4",      ARCH_AVRXMEGA2, "__AVR_ATxmega16A4__",      0, 0, 0x2000, 1, "x16a4")
+ AVR_MCU ("atxmega16a4u",     ARCH_AVRXMEGA2, "__AVR_ATxmega16A4U__",     0, 0, 0x2000, 1, "x16a4u")
+ AVR_MCU ("atxmega16c4",      ARCH_AVRXMEGA2, "__AVR_ATxmega16C4__",      0, 0, 0x2000, 1, "x16c4")

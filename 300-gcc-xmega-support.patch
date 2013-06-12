@@ -1,0 +1,171 @@
+diff -Naurp gcc/config/avr/avr.c gcc/config/avr/avr.c
+--- gcc/config/avr/avr.c	2012-09-04 15:08:42.000000000 +0530
++++ gcc/config/avr/avr.c	2012-11-09 19:01:17.000000000 +0530
+@@ -490,6 +490,15 @@ avr_interrupt_function_p (tree func)
+   return avr_lookup_function_attribute1 (func, "interrupt");
+ }
+ 
++/* Return nonzero if FUNC is an nmi function as specified
++   by the "nmi" attribute.  */
++
++static int
++avr_nmi_function_p (tree func)
++{
++  return avr_lookup_function_attribute1 (func, "nmi");
++}
++
+ /* Return nonzero if FUNC is a signal function as specified
+    by the "signal" attribute.  */
+ 
+@@ -536,15 +545,22 @@ avr_set_current_function (tree decl)
+   cfun->machine->is_naked = avr_naked_function_p (decl);
+   cfun->machine->is_signal = avr_signal_function_p (decl);
+   cfun->machine->is_interrupt = avr_interrupt_function_p (decl);
++  cfun->machine->is_nmi = avr_nmi_function_p (decl);
+   cfun->machine->is_OS_task = avr_OS_task_function_p (decl);
+   cfun->machine->is_OS_main = avr_OS_main_function_p (decl);
+ 
+-  isr = cfun->machine->is_interrupt ? "interrupt" : "signal";
++  if (cfun->machine->is_interrupt)
++    isr = "interrupt";
++  else if (cfun->machine->is_nmi)
++    isr = "nmi";
++  else
++    isr = "signal";
+ 
+   /* Too much attributes make no sense as they request conflicting features. */
+ 
+   if (cfun->machine->is_OS_task + cfun->machine->is_OS_main
+-      + (cfun->machine->is_signal || cfun->machine->is_interrupt) > 1)
++      + (cfun->machine->is_signal || cfun->machine->is_interrupt 
++          || cfun->machine->is_nmi) > 1)
+     error_at (loc, "function attributes %qs, %qs and %qs are mutually"
+                " exclusive", "OS_task", "OS_main", isr);
+ 
+@@ -555,7 +571,8 @@ avr_set_current_function (tree decl)
+     warning_at (loc, OPT_Wattributes, "function attributes %qs and %qs have"
+                 " no effect on %qs function", "OS_task", "OS_main", "naked");
+ 
+-  if (cfun->machine->is_interrupt || cfun->machine->is_signal)
++  if (cfun->machine->is_interrupt || cfun->machine->is_signal 
++          || cfun->machine->is_nmi)
+     {
+       tree args = TYPE_ARG_TYPES (TREE_TYPE (decl));
+       tree ret = TREE_TYPE (TREE_TYPE (decl));
+@@ -6827,6 +6844,8 @@ avr_attribute_table[] =
+     false },
+   { "interrupt", 0, 0, true,  false, false,  avr_handle_fndecl_attribute,
+     false },
++  { "nmi",       0, 0, true,  false, false,  avr_handle_fndecl_attribute,
++    false },
+   { "naked",     0, 0, false, true,  true,   avr_handle_fntype_attribute,
+     false },
+   { "OS_task",   0, 0, false, true,  true,   avr_handle_fntype_attribute,
+diff -Naurp gcc/config/avr/avr.h gcc/config/avr/avr.h
+--- gcc/config/avr/avr.h	2012-06-28 19:28:32.000000000 +0530
++++ gcc/config/avr/avr.h	2012-11-09 19:01:17.000000000 +0530
+@@ -683,6 +683,10 @@ struct GTY(()) machine_function
+   /* 'true' - if current function is a signal function 
+      as specified by the "signal" attribute.  */
+   int is_signal;
++
++  /* 'true' - if current function is an nmi function 
++     as specified by the "nmi" attribute.  */
++  int is_nmi;
+   
+   /* 'true' - if current function is a 'task' function 
+      as specified by the "OS_task" attribute.  */
+diff -Naurp gcc/testsuite/gcc.target/avr/misspelled-handler-warning.c gcc/testsuite/gcc.target/avr/misspelled-handler-warning.c
+--- gcc/testsuite/gcc.target/avr/misspelled-handler-warning.c	1970-01-01 05:30:00.000000000 +0530
++++ gcc/testsuite/gcc.target/avr/misspelled-handler-warning.c	2012-11-09 19:01:17.000000000 +0530
+@@ -0,0 +1,13 @@
++/* Test warning emitted for functions with nmi attribute that do
++ * not start with __vector */
++/* { dg-do compile } */
++
++
++void __attribute__((interrupt)) interrupt_fun() /* { dg-warning "'interrupt_fun' appears to be a misspelled interrupt handler" } */
++{}
++
++void __attribute__((signal)) signal_fun() /* { dg-warning "'signal_fun' appears to be a misspelled signal handler" } */
++{}
++
++void __attribute__((nmi)) nmi_fun() /* { dg-warning "'nmi_fun' appears to be a misspelled nmi handler" } */
++{}
+diff -Naurp gcc/testsuite/gcc.target/avr/xmega_const_hi_io_address.c gcc/testsuite/gcc.target/avr/xmega_const_hi_io_address.c
+--- gcc/testsuite/gcc.target/avr/xmega_const_hi_io_address.c	1970-01-01 05:30:00.000000000 +0530
++++ gcc/testsuite/gcc.target/avr/xmega_const_hi_io_address.c	2012-11-09 19:01:17.000000000 +0530
+@@ -0,0 +1,15 @@
++/* Verify that loading the contents of a constant int address in I/O range
++   uses two IN instructions with the correct SFR offset for XMEGA*/
++/* { dg-do compile } */
++/* { dg-options "-Os" } */
++/* { dg-skip-if "Only for XMEGAs" { "avr-*-*" } { "*" } { "-mmcu=atxmega128a1" } } */
++
++void func()
++{
++    volatile int val = *((int *)0x20);
++    *((int *)0x20) = 0xCAFE;
++
++}
++
++/* { dg-final { scan-assembler "\tin r\\d+,0x20\n\tin r\\d+,0x20\\+1" } } */
++/* { dg-final { scan-assembler "\tout 0x20,r\\d+\n\tout 0x20\\+1,r\\d+" } } */
+diff -Naurp gcc/testsuite/gcc.target/avr/xmega_const_qi_io_address.c gcc/testsuite/gcc.target/avr/xmega_const_qi_io_address.c
+--- gcc/testsuite/gcc.target/avr/xmega_const_qi_io_address.c	1970-01-01 05:30:00.000000000 +0530
++++ gcc/testsuite/gcc.target/avr/xmega_const_qi_io_address.c	2012-11-09 19:01:17.000000000 +0530
+@@ -0,0 +1,14 @@
++/* Verify that loading the contents of a constant address in I/O range
++   uses the IN instruction with the correct SFR offset for XMEGA*/
++/* { dg-do compile } */
++/* { dg-options "-Os" } */
++/* { dg-skip-if "Only for XMEGAs" { "avr-*-*" } { "*" } { "-mmcu=atxmega128a1" } } */
++
++void func()
++{
++    volatile char val = *((char *)0x20);
++    *((char *)0x20) = 42;
++}
++
++/* { dg-final { scan-assembler "\tin r\\d+,0x20" } } */
++/* { dg-final { scan-assembler "\tout 0x20,r\\d+" } } */
+diff -Naurp gcc/testsuite/gcc.target/avr/xmega_interrupt_no_cli.c gcc/testsuite/gcc.target/avr/xmega_interrupt_no_cli.c
+--- gcc/testsuite/gcc.target/avr/xmega_interrupt_no_cli.c	1970-01-01 05:30:00.000000000 +0530
++++ gcc/testsuite/gcc.target/avr/xmega_interrupt_no_cli.c	2012-11-09 19:01:17.000000000 +0530
+@@ -0,0 +1,14 @@
++/* Verify that XMEGA interrupts don't have a cli or sei
++   and that SPL is written before SPH*/
++/* { dg-do compile } */
++/* { dg-options "-Os" } */
++/* { dg-skip-if "Only for XMEGAs" { "avr-*-*" } { "*" } { "-mmcu=atxmega128a1" } } */
++
++void __attribute__((interrupt)) __vector_1()
++{
++    volatile int w = 19, x = 20, y = 30, z = 42;
++}
++
++/* { dg-final { scan-assembler-not "\tcli" } } */
++/* { dg-final { scan-assembler "\tout __SP_L__,r\\d+\n\tout __SP_H__,r\\d+" } } */
++
+diff -Naurp gcc/testsuite/gcc.target/avr/xmega_sfr_offsets.c gcc/testsuite/gcc.target/avr/xmega_sfr_offsets.c
+--- gcc/testsuite/gcc.target/avr/xmega_sfr_offsets.c	1970-01-01 05:30:00.000000000 +0530
++++ gcc/testsuite/gcc.target/avr/xmega_sfr_offsets.c	2012-11-09 19:01:17.000000000 +0530
+@@ -0,0 +1,18 @@
++/* Verify that SFR offsets for XMEGAs do not have the 0x20 offset 
++   and that they are saved on entry, restored on exit for an interrupt
++   function  */
++/* { dg-do compile } */
++/* { dg-options "-Os" } */
++/* { dg-skip-if "Only for XMEGAs" { "avr-*-*" } { "*" } { "-mmcu=atxmega128a1" } } */
++
++void __attribute__((interrupt)) __vector_1()
++{
++}
++
++/* { dg-final { scan-assembler "__SREG__ = 0x3f" } } */
++/* { dg-final { scan-assembler "__RAMPD__ = 0x38" } } */
++/* { dg-final { scan-assembler "\tin r0,__SREG__" } } */
++/* { dg-final { scan-assembler "\tin r0,__RAMPD__" } } */
++/* { dg-final { scan-assembler "\tpop r0\n\tout __SREG__,r0" } } */
++/* { dg-final { scan-assembler "\tpop r0\n\tout __RAMPD__,r0" } } */
++
