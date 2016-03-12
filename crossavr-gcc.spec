@@ -10,8 +10,9 @@ Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AV
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
 Version:	4.7.3
-Release:	1
+Release:	2
 Epoch:		1
+Patch0:		gnu_inline-mismatch.patch
 # Patches 1xx are taken form Atmel official AVR8-GNU toolchain version 3.4.2
 # http://distribute.atmel.no/tools/opensource/Atmel-AVR-Toolchain-3.4.2/avr/avr-patches.tar.gz
 Patch100:	300-gcc-xmega-support.patch
@@ -86,6 +87,7 @@ Ten pakiet dodaje obsługę C++ do kompilatora gcc dla AVR.
 %prep
 %setup -q -n gcc-%{version}
 cd gcc/config/%{target} && %undos -f c,h && cd -
+%patch0 -p1
 %patch100 -p0
 #patch101 -p0
 %patch102 -p0
