@@ -10,8 +10,12 @@ Summary(pt_BR.UTF-8):	Utilitários para desenvolvimento de binários da GNU - AV
 Summary(tr.UTF-8):	GNU geliştirme araçları - AVR gcc
 Name:		crossavr-gcc
 Version:	4.7.3
-Release:	2
+Release:	3
 Epoch:		1
+License:	GPL v3+
+Group:		Development/Languages
+Source0:	http://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
+# Source0-md5:	86f428a30379bdee0224e353ee2f999e
 Patch0:		gnu_inline-mismatch.patch
 # Patches 1xx are taken form Atmel official AVR8-GNU toolchain version 3.4.2
 # http://distribute.atmel.no/tools/opensource/Atmel-AVR-Toolchain-3.4.2/avr/avr-patches.tar.gz
@@ -28,33 +32,37 @@ Patch109:	502-gcc-pr54796.patch
 Patch110:	503-gcc-avrtc-513.patch
 Patch111:	504-gcc-avrtc-610.patch
 Patch112:	505-gcc-avrtc586.patch
-License:	GPL
-Group:		Development/Languages
-Source0:	ftp://gcc.gnu.org/pub/gcc/releases/gcc-%{version}/gcc-%{version}.tar.bz2
-# Source0-md5:	86f428a30379bdee0224e353ee2f999e
+URL:		http://gcc.gnu.org/
 BuildRequires:	/bin/bash
 BuildRequires:	autoconf
 BuildRequires:	bison
+BuildRequires:	cloog-ppl-devel >= 0.16.1
 BuildRequires:	crossavr-binutils >= 2.23.1
 BuildRequires:	elfutils-devel >= 0.145-1
 BuildRequires:	flex
-BuildRequires:	gmp-devel >= 4.1
-BuildRequires:	libmpc-devel
-BuildRequires:	mpfr-devel >= 2.3.0
+BuildRequires:	gmp-devel >= 4.3.2
+BuildRequires:	libmpc-devel >= 0.8.0
+BuildRequires:	mpfr-devel >= 2.4.2
 BuildRequires:	perl-tools-pod
-BuildRequires:	ppl-devel
+BuildRequires:	ppl-devel >= 0.11
 BuildRequires:	rpmbuild(macros) >= 1.565
 BuildRequires:	sed >= 4.0
 Requires:	crossavr-binutils >= 2.23.1
 %{!?with_bootstrap:Requires:	crossavr-libc}
+Requires:	cloog-ppl-libs >= 0.16.1
+Requires:	gmp >= 4.3.2
 Requires:	gcc-dirs
+Requires:	libmpc >= 0.8.0
+Requires:	mpfr >= 2.4.2
+Requires:	ppl >= 0.11
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		target		avr
-%define		arch		%{_prefix}/%{target}
-%define		gccarch		%{_libdir}/gcc/%{target}
-%define		gcclib		%{_libdir}/gcc/%{target}/%{version}
-%define		_noautostrip	.*%{gcclib}.*/libgc.*\\.a
+%define		archprefix	%{_prefix}/%{target}
+%define		gccarchdir	%{_libdir}/gcc/%{target}
+%define		gcclibdir	%{_libdir}/gcc/%{target}/%{version}
+
+%define		_noautostrip	.*%{gcclibdir}.*/libgc.*\\.a
 
 # functions with printf format attribute but with special parser and also
 # receiving non constant format strings
@@ -111,31 +119,33 @@ CFLAGS="%{rpmcflags}" \
 CXXFLAGS="%{rpmcflags}" \
 TEXCONFIG=false \
 ../configure \
+	MAKEINFO=/bin/true \
 	--prefix=%{_prefix} \
-	--infodir=%{_infodir} \
-	--mandir=%{_mandir} \
 	--bindir=%{_bindir} \
 	--libdir=%{_libdir} \
 	--libexecdir=%{_libdir} \
+	--infodir=%{_infodir} \
+	--mandir=%{_mandir} \
 	--enable-c99 \
 	--enable-languages="c,c++" \
+	--disable-libssp \
 	--enable-long-long \
 	--enable-lto \
+	--disable-ppl-version-check \
 	--disable-shared \
-	--disable-libssp \
 	--with-dwarf2 \
 	--with-gnu-as \
 	--with-gnu-ld \
-	--with-system-zlib \
 	--with-multilib \
 	--with-ppl \
-	--disable-ppl-version-check \
+	--with-system-zlib \
 	--without-x \
 	--build=%{_target_platform} \
 	--host=%{_target_platform} \
 	--target=%{target}
 
-%{__make} CFLAGS_FOR_TARGET="-Os"
+%{__make} \
+	CFLAGS_FOR_TARGET="-Os"
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -144,22 +154,20 @@ rm -rf $RPM_BUILD_ROOT
 	DESTDIR=$RPM_BUILD_ROOT
 
 # move fixed includes to proper place
-cp $RPM_BUILD_ROOT%{gcclib}/include-fixed/*.h $RPM_BUILD_ROOT%{gcclib}/include
+cp -p $RPM_BUILD_ROOT%{gcclibdir}/include-fixed/{limits,syslimits}.h $RPM_BUILD_ROOT%{gcclibdir}/include
 
 # don't want it here
-rm -f $RPM_BUILD_ROOT%{_libdir}/libiberty.a
-rm -rf $RPM_BUILD_ROOT%{_infodir}
-rm -f $RPM_BUILD_ROOT%{_mandir}/man7/fsf-funding.7
-rm -f $RPM_BUILD_ROOT%{_mandir}/man7/gfdl.7
-rm -f $RPM_BUILD_ROOT%{_mandir}/man7/gpl.7
-rm -f $RPM_BUILD_ROOT%{_datadir}/locale/*/LC_MESSAGES/{gcc,cpplib}.mo
-rm -rf $RPM_BUILD_ROOT%{gcclib}/include-fixed
-rm -rf $RPM_BUILD_ROOT%{gcclib}/install-tools
-rm -f $RPM_BUILD_ROOT%{gcclib}/liblto_plugin.la
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/libiberty.a
+%{__rm} $RPM_BUILD_ROOT%{_mandir}/man7/{fsf-funding,gfdl,gpl}.7
+%{__rm} -r $RPM_BUILD_ROOT%{_infodir}
+%{__rm} -r $RPM_BUILD_ROOT%{_localedir}
+%{__rm} -r $RPM_BUILD_ROOT%{gcclibdir}/include-fixed
+%{__rm} -r $RPM_BUILD_ROOT%{gcclibdir}/install-tools
+%{__rm} $RPM_BUILD_ROOT%{gcclibdir}/liblto_plugin.la
 
 %if 0%{!?debug:1}
 # strip target libraries
-%{target}-strip -g $RPM_BUILD_ROOT%{gcclib}{,/avr*}/libg*.a
+%{target}-strip -g $RPM_BUILD_ROOT%{gcclibdir}{,/avr*}/libg*.a
 %endif
 
 %clean
@@ -167,23 +175,55 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/%{target}-gcc*
 %attr(755,root,root) %{_bindir}/%{target}-cpp
+%attr(755,root,root) %{_bindir}/%{target}-gcc
+%attr(755,root,root) %{_bindir}/%{target}-gcc-%{version}
+%attr(755,root,root) %{_bindir}/%{target}-gcc-ar
+%attr(755,root,root) %{_bindir}/%{target}-gcc-nm
+%attr(755,root,root) %{_bindir}/%{target}-gcc-ranlib
 %attr(755,root,root) %{_bindir}/%{target}-gcov
-%dir %{gccarch}
-%dir %{gcclib}
-%attr(755,root,root) %{gcclib}/cc1
-%attr(755,root,root) %{gcclib}/collect2
-%attr(755,root,root) %{gcclib}/lto-wrapper
-%attr(755,root,root) %{gcclib}/lto1
-%attr(755,root,root) %{gcclib}/liblto_plugin.so*
-%{gcclib}/libg*.a
-%{gcclib}/%{target}*
-%{gcclib}/plugin
-%dir %{gcclib}/tiny-stack
-%{gcclib}/tiny-stack/*.a
-%dir %{gcclib}/include
-%{gcclib}/include/*.h
+%dir %{gccarchdir}
+%dir %{gcclibdir}
+%attr(755,root,root) %{gcclibdir}/cc1
+%attr(755,root,root) %{gcclibdir}/collect2
+%attr(755,root,root) %{gcclibdir}/lto-wrapper
+%attr(755,root,root) %{gcclibdir}/lto1
+%attr(755,root,root) %{gcclibdir}/liblto_plugin.so*
+%{gcclibdir}/libgcc.a
+%{gcclibdir}/libgcov.a
+# subtargets
+%{gcclibdir}/avr25
+%{gcclibdir}/avr3
+%{gcclibdir}/avr31
+%{gcclibdir}/avr35
+%{gcclibdir}/avr4
+%{gcclibdir}/avr5
+%{gcclibdir}/avr51
+%{gcclibdir}/avr6
+%{gcclibdir}/avrxmega2
+%{gcclibdir}/avrxmega4
+%{gcclibdir}/avrxmega5
+%{gcclibdir}/avrxmega6
+%{gcclibdir}/avrxmega7
+%{gcclibdir}/tiny-stack
+%dir %{gcclibdir}/include
+%{gcclibdir}/include/float.h
+%{gcclibdir}/include/iso646.h
+%{gcclibdir}/include/limits.h
+%{gcclibdir}/include/stdalign.h
+%{gcclibdir}/include/stdarg.h
+%{gcclibdir}/include/stdbool.h
+%{gcclibdir}/include/stddef.h
+%{gcclibdir}/include/stdfix.h
+%{gcclibdir}/include/stdint-gcc.h
+%{gcclibdir}/include/stdint.h
+%{gcclibdir}/include/stdnoreturn.h
+%{gcclibdir}/include/syslimits.h
+%{gcclibdir}/include/tgmath.h
+%{gcclibdir}/include/unwind.h
+%{gcclibdir}/include/varargs.h
+# plugin-devel
+%{gcclibdir}/plugin
 %{_mandir}/man1/%{target}-cpp.1*
 %{_mandir}/man1/%{target}-gcc.1*
 %{_mandir}/man1/%{target}-gcov.1*
@@ -192,5 +232,5 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/%{target}-g++
 %attr(755,root,root) %{_bindir}/%{target}-c++
-%attr(755,root,root) %{gcclib}/cc1plus
+%attr(755,root,root) %{gcclibdir}/cc1plus
 %{_mandir}/man1/%{target}-g++.1*
