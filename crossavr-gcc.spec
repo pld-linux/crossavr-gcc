@@ -95,19 +95,19 @@ Ten pakiet dodaje obsługę C++ do kompilatora gcc dla AVR.
 %prep
 %setup -q -n gcc-%{version}
 cd gcc/config/%{target} && %undos -f c,h && cd -
-%patch0 -p1
-%patch100 -p0
+%patch -P0 -p1
+%patch -P100 -p0
 #patch101 -p0
-%patch102 -p0
-%patch103 -p0
+%patch -P102 -p0
+%patch -P103 -p0
 #patch104 -p0
 #patch105 -p0
 #patch106 -p0
 #patch107 -p0
 #patch108 -p0
-%patch109 -p0
+%patch -P109 -p0
 #patch110 -p0
-%patch111 -p0
+%patch -P111 -p0
 #patch112 -p0
 
 %build
